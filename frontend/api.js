@@ -21,6 +21,14 @@ export function getAmbulances() {
   return request("/api/ambulances");
 }
 
+export function getHospitals() {
+  return request("/api/hospitals");
+}
+
+export function getEmergencyLocation() {
+  return request("/api/emergency-location");
+}
+
 export function dispatchAmbulance(emergencyLocation, priority) {
   return request("/api/dispatch", {
     method: "POST",

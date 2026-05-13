@@ -1,4 +1,4 @@
-from models import Ambulance, TrafficLight
+from models import Ambulance, EmergencyLocation, Hospital, TrafficLight
 
 traffic_lights = [
     TrafficLight(id=1, location="Avenida Central", status="red"),
@@ -11,6 +11,18 @@ ambulances = [
     Ambulance(id=2, driver="Luis Rojas", location="Base Sur", priority="low"),
 ]
 
+hospitals = [
+    Hospital(id=1, name="Hospital Mexico", location="La Uruca", available_beds=8),
+    Hospital(id=2, name="Hospital San Juan", location="San Jose centro", available_beds=5),
+    Hospital(id=3, name="Hospital Calderon Guardia", location="Aranjuez", available_beds=3),
+]
+
+current_emergency = EmergencyLocation(
+    location="Sin emergencia activa",
+    priority="none",
+    status="waiting",
+)
+
 
 def get_traffic_lights():
     return traffic_lights
@@ -18,6 +30,14 @@ def get_traffic_lights():
 
 def get_ambulances():
     return ambulances
+
+
+def get_hospitals():
+    return hospitals
+
+
+def get_emergency_location():
+    return current_emergency
 
 
 def prioritize_route(emergency_location: str, priority: str):
@@ -28,10 +48,14 @@ def prioritize_route(emergency_location: str, priority: str):
     selected.location = emergency_location
     selected.priority = priority
     selected.active = True
+    current_emergency.location = emergency_location
+    current_emergency.priority = priority
+    current_emergency.status = "assigned"
 
     return {
         "message": "Emergency route prioritized",
         "ambulance": selected,
+        "emergency_location": current_emergency,
         "traffic_lights": traffic_lights,
     }
 
@@ -45,5 +69,8 @@ def reset_simulation():
     ambulances[0].priority = "medium"
     ambulances[1].location = "Base Sur"
     ambulances[1].priority = "low"
+    current_emergency.location = "Sin emergencia activa"
+    current_emergency.priority = "none"
+    current_emergency.status = "waiting"
 
     return {"message": "Simulation reset"}

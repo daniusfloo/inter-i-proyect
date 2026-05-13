@@ -3,6 +3,8 @@ from fastapi import APIRouter
 from models import DispatchRequest
 from services import (
     get_ambulances,
+    get_emergency_location,
+    get_hospitals,
     get_traffic_lights,
     prioritize_route,
     reset_simulation,
@@ -19,6 +21,16 @@ def traffic_lights():
 @router.get("/ambulances")
 def ambulances():
     return get_ambulances()
+
+
+@router.get("/hospitals")
+def hospitals():
+    return get_hospitals()
+
+
+@router.get("/emergency-location")
+def emergency_location():
+    return get_emergency_location()
 
 
 @router.post("/dispatch")

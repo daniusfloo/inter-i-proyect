@@ -7,6 +7,19 @@ class TrafficLight(BaseModel):
     status: str
 
 
+class Hospital(BaseModel):
+    id: int
+    name: str
+    location: str
+    available_beds: int
+
+
+class EmergencyLocation(BaseModel):
+    location: str
+    priority: str
+    status: str
+
+
 class Ambulance(BaseModel):
     id: int
     driver: str
