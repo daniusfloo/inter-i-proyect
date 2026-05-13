@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Smart Ambulance</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">Centro de control</p>
+          <h1>Smart Ambulance</h1>
+          <p class="summary">
+            Priorizacion simple de rutas para ambulancias y control de semaforos.
+          </p>
+        </div>
+        <div class="status-panel">
+          <span id="apiStatus" class="status-dot"></span>
+          <span>Backend</span>
+        </div>
+      </section>
+
+      <section class="toolbar">
+        <label>
+          Emergencia
+          <input id="locationInput" type="text" value="Hospital Mexico" />
+        </label>
+        <label>
+          Prioridad
+          <select id="priorityInput">
+            <option value="high">Alta</option>
+            <option value="medium">Media</option>
+            <option value="low">Baja</option>
+          </select>
+        </label>
+        <button id="dispatchBtn">Despachar ambulancia</button>
+        <button id="resetBtn" class="secondary">Reiniciar</button>
+      </section>
+
+      <section class="grid">
+        <article>
+          <h2>Ambulancias</h2>
+          <div id="ambulanceList" class="list"></div>
+        </article>
+        <article>
+          <h2>Semaforos</h2>
+          <div id="trafficList" class="list"></div>
+        </article>
+      </section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
