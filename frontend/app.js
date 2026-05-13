@@ -7,7 +7,8 @@ import {
 } from "./api.js";
 
 const apiStatus = document.querySelector("#apiStatus");
-const ambulanceList = document.querySelector("#ambulanceList");
+const emergencyAmbulanceList = document.querySelector("#emergencyAmbulanceList");
+const availableAmbulanceList = document.querySelector("#availableAmbulanceList");
 const hospitalList = document.querySelector("#hospitalList");
 const emergencyLocation = document.querySelector("#emergencyLocation");
 const locationInput = document.querySelector("#locationInput");
@@ -36,7 +37,25 @@ function priorityLabel(priority) {
 }
 
 function renderAmbulances(ambulances) {
-  ambulanceList.innerHTML = ambulances
+  const emergencyAmbulances = ambulances.filter((ambulance) => ambulance.active);
+  const availableAmbulances = ambulances.filter((ambulance) => !ambulance.active);
+
+  emergencyAmbulanceList.innerHTML = renderAmbulanceCards(
+    emergencyAmbulances,
+    "No hay ambulancias en emergencia.",
+  );
+  availableAmbulanceList.innerHTML = renderAmbulanceCards(
+    availableAmbulances,
+    "No hay ambulancias disponibles.",
+  );
+}
+
+function renderAmbulanceCards(ambulances, emptyMessage) {
+  if (ambulances.length === 0) {
+    return `<p class="${emptyClasses}">${emptyMessage}</p>`;
+  }
+
+  return ambulances
     .map(
       (ambulance) => `
         <div class="${itemClasses}">
@@ -98,7 +117,8 @@ async function loadDashboard() {
   } catch (error) {
     apiStatus.classList.remove("bg-emerald-500");
     apiStatus.classList.add("bg-rose-500");
-    ambulanceList.innerHTML = `<p class="${emptyClasses}">No se pudo conectar con el backend.</p>`;
+    emergencyAmbulanceList.innerHTML = `<p class="${emptyClasses}">No se pudo conectar con el backend.</p>`;
+    availableAmbulanceList.innerHTML = `<p class="${emptyClasses}">No se pudo conectar con el backend.</p>`;
     hospitalList.innerHTML = `<p class="${emptyClasses}">Levanta FastAPI en el puerto 8001.</p>`;
     emergencyLocation.innerHTML = `<p class="${emptyClasses}">Sin datos de emergencia.</p>`;
   }

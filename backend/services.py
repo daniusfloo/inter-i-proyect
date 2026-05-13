@@ -7,8 +7,8 @@ traffic_lights = [
 ]
 
 ambulances = [
-    Ambulance(id=1, driver="Ana Perez", location="Base Norte", priority="medium"),
-    Ambulance(id=2, driver="Luis Rojas", location="Base Sur", priority="low"),
+    Ambulance(id=1, driver="Ana Perez", location="Base Norte", priority="medium", active=False),
+    Ambulance(id=2, driver="Luis Rojas", location="Base Sur", priority="low", active=False),
 ]
 
 hospitals = [
@@ -67,8 +67,10 @@ def reset_simulation():
 
     ambulances[0].location = "Base Norte"
     ambulances[0].priority = "medium"
+    ambulances[0].active = False
     ambulances[1].location = "Base Sur"
     ambulances[1].priority = "low"
+    ambulances[1].active = False
     current_emergency.location = "Sin emergencia activa"
     current_emergency.priority = "none"
     current_emergency.status = "waiting"
