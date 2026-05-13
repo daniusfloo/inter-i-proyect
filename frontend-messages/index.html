@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>S.E.A: Monitor de Emergencias</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+  </head>
+  <body class="bg-slate-100 text-slate-900 antialiased">
+    <main class="mx-auto flex min-h-screen w-[min(900px,calc(100%-32px))] flex-col py-8">
+      <section
+        class="rounded-lg bg-[linear-gradient(90deg,rgba(15,37,54,.94),rgba(18,86,112,.82)),url('https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center p-7 text-white"
+      >
+        <p class="mb-2 text-xs font-bold uppercase text-teal-200">
+          Mensajes de ruta
+        </p>
+        <h1 class="mb-2 text-3xl font-bold leading-tight md:text-5xl">
+          S.E.A: Monitor de Emergencias
+        </h1>
+        <p class="max-w-2xl text-slate-100">
+          Vista de solo lectura para recibir informacion de ambulancias activas y su ruta.
+        </p>
+      </section>
+
+      <section class="my-6 rounded-lg border border-slate-200 bg-white p-5">
+        <div class="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+          <div>
+            <h2 class="text-lg font-bold">Centro de mensajes</h2>
+            <p id="lastUpdate" class="mt-1 text-sm text-slate-500">
+              Esperando informacion del sistema...
+            </p>
+          </div>
+          <div
+            class="inline-flex w-fit items-center gap-3 rounded-lg border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-bold text-slate-700"
+          >
+            <span id="apiStatus" class="h-3 w-3 rounded-full bg-rose-500"></span>
+            <span>Conexion API</span>
+          </div>
+        </div>
+      </section>
+
+      <section
+        id="messageList"
+        class="grid flex-1 content-start gap-4 rounded-lg border border-slate-200 bg-white p-5"
+      ></section>
+    </main>
+
+    <script type="module" src="app.js"></script>
+  </body>
+</html>
