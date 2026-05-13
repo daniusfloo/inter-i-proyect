@@ -15,6 +15,15 @@ const priorityInput = document.querySelector("#priorityInput");
 const dispatchBtn = document.querySelector("#dispatchBtn");
 const resetBtn = document.querySelector("#resetBtn");
 
+const itemClasses =
+  "flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center";
+const textStackClasses = "grid gap-1";
+const mutedTextClasses = "text-slate-500";
+const metaClasses = "grid gap-1 text-left sm:text-right";
+const pillClasses =
+  "inline-flex min-h-7 min-w-20 items-center justify-center rounded-full bg-teal-50 px-3 text-sm font-bold text-teal-800";
+const emptyClasses = "text-slate-500";
+
 function priorityLabel(priority) {
   const labels = {
     high: "Alta",
@@ -30,14 +39,14 @@ function renderAmbulances(ambulances) {
   ambulanceList.innerHTML = ambulances
     .map(
       (ambulance) => `
-        <div class="item">
-          <div>
+        <div class="${itemClasses}">
+          <div class="${textStackClasses}">
             <strong>Ambulancia ${ambulance.id}</strong>
-            <span>${ambulance.driver}</span>
+            <span class="${mutedTextClasses}">${ambulance.driver}</span>
           </div>
-          <div class="meta">
-            <span>${ambulance.location}</span>
-            <span class="pill">${ambulance.priority}</span>
+          <div class="${metaClasses}">
+            <span class="${mutedTextClasses}">${ambulance.location}</span>
+            <span class="${pillClasses}">${priorityLabel(ambulance.priority)}</span>
           </div>
         </div>
       `,
@@ -49,12 +58,12 @@ function renderHospitals(hospitals) {
   hospitalList.innerHTML = hospitals
     .map(
       (hospital) => `
-        <div class="item">
-          <div>
+        <div class="${itemClasses}">
+          <div class="${textStackClasses}">
             <strong>${hospital.name}</strong>
-            <span>${hospital.location}</span>
+            <span class="${mutedTextClasses}">${hospital.location}</span>
           </div>
-          <span class="pill">${hospital.available_beds} camas</span>
+          <span class="${pillClasses}">${hospital.available_beds} camas</span>
         </div>
       `,
     )
@@ -63,12 +72,12 @@ function renderHospitals(hospitals) {
 
 function renderEmergencyLocation(emergency) {
   emergencyLocation.innerHTML = `
-    <div class="item">
-      <div>
+    <div class="${itemClasses}">
+      <div class="${textStackClasses}">
         <strong>${emergency.location}</strong>
-        <span>${emergency.status === "assigned" ? "Ambulancia asignada" : "Esperando despacho"}</span>
+        <span class="${mutedTextClasses}">${emergency.status === "assigned" ? "Ambulancia asignada" : "Esperando despacho"}</span>
       </div>
-      <span class="pill">${priorityLabel(emergency.priority)}</span>
+      <span class="${pillClasses}">${priorityLabel(emergency.priority)}</span>
     </div>
   `;
 }
@@ -84,12 +93,14 @@ async function loadDashboard() {
     renderAmbulances(ambulances);
     renderHospitals(hospitals);
     renderEmergencyLocation(emergency);
-    apiStatus.classList.add("online");
+    apiStatus.classList.remove("bg-rose-500");
+    apiStatus.classList.add("bg-emerald-500");
   } catch (error) {
-    apiStatus.classList.remove("online");
-    ambulanceList.innerHTML = `<p class="empty">No se pudo conectar con el backend.</p>`;
-    hospitalList.innerHTML = `<p class="empty">Levanta FastAPI en el puerto 8001.</p>`;
-    emergencyLocation.innerHTML = `<p class="empty">Sin datos de emergencia.</p>`;
+    apiStatus.classList.remove("bg-emerald-500");
+    apiStatus.classList.add("bg-rose-500");
+    ambulanceList.innerHTML = `<p class="${emptyClasses}">No se pudo conectar con el backend.</p>`;
+    hospitalList.innerHTML = `<p class="${emptyClasses}">Levanta FastAPI en el puerto 8001.</p>`;
+    emergencyLocation.innerHTML = `<p class="${emptyClasses}">Sin datos de emergencia.</p>`;
   }
 }
 

@@ -13,10 +13,6 @@ async function request(path, options = {}) {
   return response.json();
 }
 
-export function getTrafficLights() {
-  return request("/api/traffic-lights");
-}
-
 export function getAmbulances() {
   return request("/api/ambulances");
 }
