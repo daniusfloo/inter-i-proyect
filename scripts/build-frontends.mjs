@@ -22,6 +22,11 @@ const builds = [
     to: resolve(dist, "menu"),
     browserTo: resolve(browserDist, "menu"),
   },
+  {
+    from: resolve(root, "frontend-route"),
+    to: resolve(dist, "route"),
+    browserTo: resolve(browserDist, "route"),
+  },
 ];
 
 await rm(dist, { recursive: true, force: true });
@@ -39,9 +44,11 @@ console.log("Build completo:");
 console.log("- dist/control");
 console.log("- dist/messages");
 console.log("- dist/menu");
+console.log("- dist/route");
 console.log("- dist-browser/control");
 console.log("- dist-browser/messages");
 console.log("- dist-browser/menu");
+console.log("- dist-browser/route");
 
 async function createBrowserBundle(sourceDir, targetDir) {
   const apiPath = resolve(sourceDir, "api.js");

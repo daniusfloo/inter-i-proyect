@@ -12,7 +12,7 @@ ambulances = [
 ]
 
 hospitals = [
-    Hospital(id=1, name="Hospital Mexico", location="La Uruca", available_beds=8),
+    Hospital(id=1, name="Hospital", location="La Uruca", available_beds=8),
     Hospital(id=2, name="Hospital San Juan", location="San Jose centro", available_beds=5),
     Hospital(id=3, name="Hospital Calderon Guardia", location="Aranjuez", available_beds=3),
 ]
