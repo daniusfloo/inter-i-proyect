@@ -4,9 +4,18 @@ function getMenuSections() {
       title: "Configuraciones",
       intro: "Opciones generales para preparar el uso del sistema.",
       items: [
-        "configuraciones de alertas",
-        "configuracion de rutas",
-        "configuracion de maps",
+        {
+          label: "configuraciones de alertas",
+          href: "alerts",
+        },
+        {
+          label: "configuracion de rutas",
+          href: "routes-config",
+        },
+        {
+          label: "configuracion de maps",
+          href: "maps-config",
+        },
       ],
     },
     ayuda: {
@@ -117,12 +126,46 @@ function renderSection(sectionId) {
         .map(
           (item) => `
             <article class="rounded-lg border border-slate-200 bg-slate-50 p-4">
-              <p class="text-slate-700">${item}</p>
+              ${renderSectionItem(item)}
             </article>
           `,
         )
         .join("")}
     </div>
+  `;
+}
+
+function renderSectionItem(item) {
+  if (typeof item === "string") {
+    return `<p class="text-slate-700">${item}</p>`;
+  }
+
+  const itemRoutes = {
+    alerts: {
+      sourcePath: "../frontend-alerts/index.html",
+      buildPath: "../alerts/",
+    },
+    "routes-config": {
+      sourcePath: "../frontend-routes-config/index.html",
+      buildPath: "../routes-config/",
+    },
+    "maps-config": {
+      sourcePath: "../frontend-maps-config/index.html",
+      buildPath: "../maps-config/",
+    },
+  };
+  const route = itemRoutes[item.href];
+  const href = route
+    ? (isSourceMenu() ? route.sourcePath : route.buildPath)
+    : "#";
+
+  return `
+    <a
+      class="font-bold text-teal-700 transition hover:text-teal-900"
+      href="${href}"
+    >
+      ${item.label}
+    </a>
   `;
 }
 

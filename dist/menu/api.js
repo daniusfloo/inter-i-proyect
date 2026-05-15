@@ -4,9 +4,18 @@ export function getMenuSections() {
       title: "Configuraciones",
       intro: "Opciones generales para preparar el uso del sistema.",
       items: [
-        "configuraciones de alertas",
-        "configuracion de rutas",
-        "configuracion de maps",
+        {
+          label: "configuraciones de alertas",
+          href: "alerts",
+        },
+        {
+          label: "configuracion de rutas",
+          href: "routes-config",
+        },
+        {
+          label: "configuracion de maps",
+          href: "maps-config",
+        },
       ],
     },
     ayuda: {

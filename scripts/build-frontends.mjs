@@ -27,6 +27,21 @@ const builds = [
     to: resolve(dist, "route"),
     browserTo: resolve(browserDist, "route"),
   },
+  {
+    from: resolve(root, "frontend-alerts"),
+    to: resolve(dist, "alerts"),
+    browserTo: resolve(browserDist, "alerts"),
+  },
+  {
+    from: resolve(root, "frontend-routes-config"),
+    to: resolve(dist, "routes-config"),
+    browserTo: resolve(browserDist, "routes-config"),
+  },
+  {
+    from: resolve(root, "frontend-maps-config"),
+    to: resolve(dist, "maps-config"),
+    browserTo: resolve(browserDist, "maps-config"),
+  },
 ];
 
 await rm(dist, { recursive: true, force: true });
@@ -45,10 +60,16 @@ console.log("- dist/control");
 console.log("- dist/messages");
 console.log("- dist/menu");
 console.log("- dist/route");
+console.log("- dist/alerts");
+console.log("- dist/routes-config");
+console.log("- dist/maps-config");
 console.log("- dist-browser/control");
 console.log("- dist-browser/messages");
 console.log("- dist-browser/menu");
 console.log("- dist-browser/route");
+console.log("- dist-browser/alerts");
+console.log("- dist-browser/routes-config");
+console.log("- dist-browser/maps-config");
 
 async function createBrowserBundle(sourceDir, targetDir) {
   const apiPath = resolve(sourceDir, "api.js");
