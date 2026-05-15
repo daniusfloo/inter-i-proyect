@@ -11,6 +11,23 @@ const inactiveTabClasses = [
   "border-slate-200",
   "hover:bg-slate-50",
 ];
+const loginRoutes = {
+  dada: {
+    password: "123",
+    buildPath: "../control/",
+    sourcePath: "../frontend/index.html",
+  },
+  dandan: {
+    password: "321",
+    buildPath: "../route/",
+    sourcePath: "../frontend-route/index.html",
+  },
+  nadnad: {
+    password: "213",
+    buildPath: "../messages/",
+    sourcePath: "../frontend-messages/index.html",
+  },
+};
 
 function setupTabs() {
   tabs.forEach((tab) => {
@@ -72,27 +89,29 @@ function renderLoginSection(section) {
         <p class="mt-2 max-w-2xl text-slate-500">${section.intro}</p>
 
         <div class="mt-6 rounded-lg border border-teal-100 bg-teal-50 p-4">
-          <p class="font-bold text-slate-900">Acceso visual</p>
+          <p class="font-bold text-slate-900">Acceso por cuenta</p>
           <p class="mt-1 text-sm text-slate-600">
-            Este formulario es solo una maqueta. No valida credenciales ni envia informacion.
+            Usa tu usuario y contrasena para entrar al panel asignado.
           </p>
         </div>
       </div>
 
-      <form class="rounded-lg border border-slate-200 bg-slate-50 p-5">
+      <form id="loginForm" class="rounded-lg border border-slate-200 bg-slate-50 p-5">
         <div class="grid gap-4">
           <label class="grid gap-2 text-sm font-bold text-slate-600">
             Usuario
             <input
+              id="usernameInput"
               class="min-h-11 rounded-md border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               type="text"
-              placeholder="usuario@sea.local"
+              placeholder="usuario"
             />
           </label>
 
           <label class="grid gap-2 text-sm font-bold text-slate-600">
             Contrasena
             <input
+              id="passwordInput"
               class="min-h-11 rounded-md border border-slate-300 bg-white px-3 text-slate-900 outline-none focus:border-teal-600 focus:ring-2 focus:ring-teal-100"
               type="password"
               placeholder="********"
@@ -101,7 +120,7 @@ function renderLoginSection(section) {
 
           <button
             class="min-h-11 rounded-md bg-teal-700 px-4 font-bold text-white"
-            type="button"
+            type="submit"
           >
             Iniciar sesion
           </button>
@@ -112,10 +131,34 @@ function renderLoginSection(section) {
           >
             Recuperar acceso
           </button>
+          <p id="loginMessage" class="hidden text-sm font-bold text-rose-700"></p>
         </div>
       </form>
     </div>
   `;
+
+  document.querySelector("#loginForm").addEventListener("submit", handleLogin);
+}
+
+function handleLogin(event) {
+  event.preventDefault();
+
+  const username = document.querySelector("#usernameInput").value.trim();
+  const password = document.querySelector("#passwordInput").value;
+  const message = document.querySelector("#loginMessage");
+  const route = loginRoutes[username];
+
+  if (!route || route.password !== password) {
+    message.textContent = "Usuario o contrasena incorrectos.";
+    message.classList.remove("hidden");
+    return;
+  }
+
+  window.location.href = isSourceMenu() ? route.sourcePath : route.buildPath;
+}
+
+function isSourceMenu() {
+  return window.location.pathname.includes("frontend-menu");
 }
 
 setupTabs();

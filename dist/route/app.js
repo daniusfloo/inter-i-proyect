@@ -6,6 +6,7 @@ const routeStatus = document.querySelector("#routeStatus");
 const alertTitle = document.querySelector("#alertTitle");
 const alertDescription = document.querySelector("#alertDescription");
 const alertOptions = document.querySelectorAll(".alert-option");
+const menuLink = document.querySelector("#menuLink");
 
 const fallbackHospitals = [
   { name: "Hospital", location: "La Uruca", available_beds: 8 },
@@ -37,6 +38,10 @@ const inactiveClasses = [
   "border-slate-200",
   "hover:bg-slate-50",
 ];
+
+menuLink.href = window.location.pathname.includes("frontend-route")
+  ? "../frontend-menu/index.html"
+  : "../menu/";
 
 function setupAlertOptions() {
   alertOptions.forEach((option) => {

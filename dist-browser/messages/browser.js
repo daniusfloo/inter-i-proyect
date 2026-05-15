@@ -22,11 +22,16 @@ function getEmergencyLocation() {
 const apiStatus = document.querySelector("#apiStatus");
 const lastUpdate = document.querySelector("#lastUpdate");
 const messageList = document.querySelector("#messageList");
+const menuLink = document.querySelector("#menuLink");
 
 const baseLocations = {
   1: "Base Norte",
   2: "Base Sur",
 };
+
+menuLink.href = window.location.pathname.includes("frontend-messages")
+  ? "../frontend-menu/index.html"
+  : "../menu/";
 
 function priorityLabel(priority) {
   const labels = {

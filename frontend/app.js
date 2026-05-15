@@ -15,6 +15,7 @@ const locationInput = document.querySelector("#locationInput");
 const priorityInput = document.querySelector("#priorityInput");
 const dispatchBtn = document.querySelector("#dispatchBtn");
 const resetBtn = document.querySelector("#resetBtn");
+const menuLink = document.querySelector("#menuLink");
 
 const itemClasses =
   "flex flex-col justify-between gap-4 rounded-lg border border-slate-200 bg-slate-50 p-4 sm:flex-row sm:items-center";
@@ -24,6 +25,10 @@ const metaClasses = "grid gap-1 text-left sm:text-right";
 const pillClasses =
   "inline-flex min-h-7 min-w-20 items-center justify-center rounded-full bg-teal-50 px-3 text-sm font-bold text-teal-800";
 const emptyClasses = "text-slate-500";
+
+menuLink.href = window.location.pathname.includes("frontend/")
+  ? "../frontend-menu/index.html"
+  : "../menu/";
 
 function priorityLabel(priority) {
   const labels = {
