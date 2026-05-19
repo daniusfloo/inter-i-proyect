@@ -4,36 +4,359 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>S.E.A: Panel Principal</title>
+    <link
+      rel="stylesheet"
+      href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+      integrity="sha256-p4NxAoJBhIINfQnq0j59J8nMKCmY60uYEw2Qz3zcgVY="
+      crossorigin=""
+    />
     <script src="https://cdn.tailwindcss.com"></script>
+    <script
+      src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+      crossorigin=""
+    ></script>
+    <style>
+      #trackingMap {
+        min-height: 560px;
+        height: 560px;
+        width: 100%;
+      }
+
+      #trackingMap .leaflet-container,
+      .leaflet-container {
+        height: 100%;
+        width: 100%;
+        font: inherit;
+      }
+
+      #trackingMap .leaflet-pane,
+      #trackingMap .leaflet-map-pane,
+      #trackingMap .leaflet-tile-pane,
+      #trackingMap .leaflet-overlay-pane,
+      #trackingMap .leaflet-shadow-pane,
+      #trackingMap .leaflet-marker-pane,
+      #trackingMap .leaflet-tooltip-pane,
+      #trackingMap .leaflet-popup-pane {
+        position: absolute;
+      }
+
+      #trackingMap .leaflet-top,
+      #trackingMap .leaflet-bottom {
+        position: absolute;
+        z-index: 20;
+      }
+
+      #trackingMap .leaflet-tile,
+      #trackingMap .leaflet-marker-icon,
+      #trackingMap .leaflet-marker-shadow {
+        max-width: none !important;
+        max-height: none !important;
+      }
+
+      #trackingMap .leaflet-tile {
+        height: 256px !important;
+        width: 256px !important;
+      }
+    </style>
   </head>
-  <body class="bg-slate-100 text-slate-900 antialiased">
-    <main class="mx-auto min-h-screen w-[min(1040px,calc(100%-32px))] py-8">
-      <section
-        class="rounded-lg bg-[linear-gradient(90deg,rgba(15,37,54,.94),rgba(18,86,112,.82)),url('https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center p-7 text-white"
-      >
-        <p class="mb-2 text-xs font-bold uppercase text-teal-200">
-          Panel de acceso
-        </p>
-        <h1 class="mb-2 text-3xl font-bold leading-tight md:text-5xl">
-          S.E.A: Servicio de Emergencia en Ambulancia
-        </h1>
-        <p class="max-w-2xl text-slate-100">
-          Panel simple para consultar opciones generales del sistema.
-        </p>
+  <body class="bg-white text-slate-900 antialiased">
+    <main class="mx-auto min-h-screen w-[min(1180px,calc(100%-32px))] py-8">
+      <section id="signupScreen">
+        <section class="relative min-h-[calc(100vh-4rem)] overflow-hidden rounded-lg border border-emerald-100 bg-[linear-gradient(112deg,rgba(236,253,245,.98)_0%,rgba(255,255,255,.92)_34%,rgba(185,28,28,.5)_100%),url('https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=1800&q=88')] bg-cover bg-center shadow-2xl shadow-emerald-100">
+          <div class="absolute inset-0 bg-[linear-gradient(rgba(6,78,59,.06)_1px,transparent_1px),linear-gradient(90deg,rgba(6,78,59,.06)_1px,transparent_1px)] bg-[size:44px_44px]"></div>
+          <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(16,185,129,.22),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(220,38,38,.22),transparent_30%),linear-gradient(120deg,rgba(255,255,255,.72),transparent_48%)]"></div>
+          <div class="absolute left-10 top-10 hidden h-28 w-28 rounded-full border border-emerald-200/70 lg:block"></div>
+          <div class="absolute left-16 top-16 hidden h-16 w-16 rounded-full border border-red-200/70 lg:block"></div>
+          <div class="relative grid min-h-[calc(100vh-4rem)] items-center gap-12 px-6 py-10 lg:grid-cols-[1fr_440px] lg:px-14">
+            <div class="max-w-2xl text-emerald-950">
+              <p class="mb-5 inline-flex rounded-full border border-emerald-200 bg-white/75 px-4 py-2 text-xs font-bold uppercase tracking-[.24em] text-red-700 shadow-sm backdrop-blur-xl">
+                Smart Emergency Access
+              </p>
+              <h1 class="text-4xl font-bold leading-tight text-emerald-950 md:text-6xl">
+                S.E.A: Servicio de Emergencia en Ambulancia
+              </h1>
+              <p class="mt-5 max-w-xl text-base leading-7 text-emerald-800 md:text-lg">
+                Gestiona rutas, alertas y seguimiento operativo desde un panel rapido para emergencias.
+              </p>
+              <div class="mt-6 flex w-fit items-center gap-3 rounded-lg border border-emerald-100 bg-white/80 px-4 py-3 text-sm font-bold text-emerald-950 shadow-sm backdrop-blur-xl">
+                <span class="relative flex h-3 w-3">
+                  <span class="absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                  <span class="relative inline-flex h-3 w-3 rounded-full bg-emerald-600"></span>
+                </span>
+                Red medica activa
+              </div>
+              <div class="mt-8 grid max-w-xl gap-3 sm:grid-cols-3">
+                <article class="rounded-lg border border-emerald-100 bg-white/85 p-4 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
+                  <p class="text-xs font-bold uppercase text-red-700">Prioridad</p>
+                  <p class="mt-1 text-sm font-bold text-emerald-950">Rutas criticas</p>
+                </article>
+                <article class="rounded-lg border border-emerald-100 bg-white/85 p-4 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
+                  <p class="text-xs font-bold uppercase text-red-700">Red medica</p>
+                  <p class="mt-1 text-sm font-bold text-emerald-950">Hospitales</p>
+                </article>
+                <article class="rounded-lg border border-emerald-100 bg-white/85 p-4 shadow-sm shadow-emerald-900/5 backdrop-blur-xl">
+                  <p class="text-xs font-bold uppercase text-red-700">Operacion</p>
+                  <p class="mt-1 text-sm font-bold text-emerald-950">Alertas</p>
+                </article>
+              </div>
+              <div class="mt-5 h-1 w-48 overflow-hidden rounded-full bg-white/80 shadow-inner">
+                <div class="h-full w-2/3 rounded-full bg-[linear-gradient(90deg,#047857,#dc2626)]"></div>
+              </div>
+            </div>
+
+            <form id="signupForm" class="relative flex w-full flex-col items-center gap-y-8 overflow-hidden rounded-lg border border-white/80 bg-white/85 px-8 py-11 shadow-2xl shadow-emerald-900/25 backdrop-blur-2xl">
+              <div class="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#047857,#dc2626,#047857)]"></div>
+              <div class="absolute right-6 top-6 h-20 w-20 rounded-full border border-emerald-100"></div>
+              <div class="absolute right-10 top-10 h-12 w-12 rounded-full border border-red-100"></div>
+
+              <div class="flex w-full flex-col items-center gap-y-4">
+                <div class="flex w-full items-center justify-between gap-3">
+                  <div class="relative grid h-14 w-14 place-items-center rounded-lg bg-red-700 text-3xl font-black text-white shadow-lg shadow-red-900/20 ring-4 ring-red-50">
+                    <span class="leading-none">+</span>
+                    <span class="absolute -right-1 -top-1 h-3 w-3 rounded-full bg-emerald-500 ring-2 ring-white"></span>
+                  </div>
+                  <div class="text-right">
+                    <p class="text-sm font-bold uppercase text-red-700">Emergency access</p>
+                    <p class="text-sm text-emerald-700">Hospital dashboard</p>
+                  </div>
+                </div>
+                <div class="w-full">
+                  <h2 class="text-3xl font-semibold text-slate-950">Crear cuenta</h2>
+                  <p class="mt-2 text-sm leading-6 text-slate-500">
+                    Acceso seguro para el centro de coordinacion.
+                  </p>
+                  <div class="mt-4 grid grid-cols-3 gap-2 text-center text-[11px] font-bold uppercase text-emerald-800">
+                    <span class="rounded-md bg-emerald-50 px-2 py-2">911</span>
+                    <span class="rounded-md bg-red-50 px-2 py-2 text-red-700">Urgente</span>
+                    <span class="rounded-md bg-emerald-50 px-2 py-2">Seguro</span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="flex w-full flex-col gap-4">
+                <input
+                  class="h-12 rounded-md border border-emerald-100 bg-white/90 px-4 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-red-700 focus:ring-2 focus:ring-red-700"
+                  placeholder="Email"
+                  required
+                  type="email"
+                />
+                <input
+                  class="h-12 rounded-md border border-emerald-100 bg-white/90 px-4 text-sm shadow-sm outline-none transition placeholder:text-slate-400 focus:border-red-700 focus:ring-2 focus:ring-red-700"
+                  placeholder="Password"
+                  required
+                  type="password"
+                />
+                <button
+                  class="mt-2 h-12 rounded-full border border-white/50 bg-[linear-gradient(135deg,rgba(255,255,255,.28),rgba(220,38,38,.82)_42%,rgba(153,27,27,.86))] px-4 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,.55),0_18px_42px_rgba(153,27,27,.24)] backdrop-blur-2xl transition hover:border-white/80 hover:bg-red-700/80 hover:shadow-[inset_0_1px_0_rgba(255,255,255,.65),0_22px_50px_rgba(153,27,27,.3)] active:scale-[.98]"
+                  type="submit"
+                >
+                  Enter
+                </button>
+                <button
+                  id="createAccountBtn"
+                  class="h-12 rounded-full border border-white/75 bg-white/35 px-4 text-sm font-bold text-emerald-950 shadow-[inset_0_1px_0_rgba(255,255,255,.75),0_16px_36px_rgba(6,78,59,.12)] backdrop-blur-2xl transition hover:border-white hover:bg-white/60 hover:shadow-[inset_0_1px_0_rgba(255,255,255,.9),0_20px_44px_rgba(6,78,59,.16)] active:scale-[.98]"
+                  type="button"
+                >
+                  Create an account
+                </button>
+              </div>
+
+              <div class="grid w-full gap-3 rounded-lg border border-emerald-100 bg-emerald-50/90 px-4 py-4 text-center text-xs font-medium leading-5 text-emerald-800 shadow-sm">
+                <div class="flex items-center justify-center gap-2">
+                  <span class="h-2 w-2 rounded-full bg-emerald-600"></span>
+                  <span>Secure medical coordination access</span>
+                </div>
+                <p>If any techproblem presents pls contact taktaka@gmail.com</p>
+              </div>
+            </form>
+          </div>
+        </section>
       </section>
 
-      <section class="my-6 grid gap-4 md:grid-cols-5">
-        <button class="menu-tab" data-section="configuraciones">Configuraciones</button>
+      <section
+        id="menuHero"
+        class="hidden rounded-lg bg-[linear-gradient(90deg,rgba(6,78,59,.94),rgba(185,28,28,.72)),url('https://images.unsplash.com/photo-1587745416684-47953f16f02f?auto=format&fit=crop&w=1600&q=80')] bg-cover bg-center p-7 text-white"
+      >
+        <div class="flex flex-col justify-between gap-5 md:flex-row md:items-start">
+          <div>
+            <p class="mb-2 text-xs font-bold uppercase text-red-100">
+              Panel principal
+            </p>
+            <h1 class="mb-2 text-3xl font-bold leading-tight md:text-5xl">
+              S.E.A: Servicio de Emergencia en Ambulancia
+            </h1>
+            <p class="max-w-2xl text-emerald-50">
+              Sistema para monitorear ambulancias, rutas y mensajes de emergencia.
+            </p>
+          </div>
+
+          <nav class="flex gap-3">
+            <button
+              id="ambulanceIconBtn"
+              class="grid h-11 w-11 place-items-center rounded-full border border-white/75 bg-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,.55),0_14px_30px_rgba(6,78,59,.18)] backdrop-blur-2xl transition hover:bg-white/40 active:scale-[.98]"
+              type="button"
+              title="Ambulancias"
+              aria-label="Ambulancias"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M3 7h11v9H3z"></path>
+                <path d="M14 10h3l3 3v3h-6z"></path>
+                <path d="M6 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+                <path d="M18 19a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"></path>
+                <path d="M8.5 9v4"></path>
+                <path d="M6.5 11h4"></path>
+              </svg>
+            </button>
+            <button
+              id="settingsIconBtn"
+              class="grid h-11 w-11 place-items-center rounded-full border border-white/75 bg-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,.55),0_14px_30px_rgba(6,78,59,.18)] backdrop-blur-2xl transition hover:bg-white/40 active:scale-[.98]"
+              type="button"
+              title="Ajustes"
+              aria-label="Ajustes"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 15.5A3.5 3.5 0 1 0 12 8a3.5 3.5 0 0 0 0 7.5z"></path>
+                <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.88l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 .6V20a2 2 0 1 1-4 0v-.09a1.7 1.7 0 0 0-1-.6 1.7 1.7 0 0 0-1.88.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-.6-1H4a2 2 0 1 1 0-4h.09a1.7 1.7 0 0 0 .6-1 1.7 1.7 0 0 0-.34-1.88l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6a1.7 1.7 0 0 0 1-.6V4a2 2 0 1 1 4 0v.09a1.7 1.7 0 0 0 1 .6 1.7 1.7 0 0 0 1.88-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9c.15.36.36.7.6 1H20a2 2 0 1 1 0 4h-.09a1.7 1.7 0 0 0-.51 1z"></path>
+              </svg>
+            </button>
+            <button
+              id="topLogoutBtn"
+              class="grid h-11 w-11 place-items-center rounded-full border border-white/75 bg-white/25 text-white shadow-[inset_0_1px_0_rgba(255,255,255,.55),0_14px_30px_rgba(153,27,27,.18)] backdrop-blur-2xl transition hover:bg-white/40 active:scale-[.98]"
+              type="button"
+              title="Log out"
+              aria-label="Log out"
+            >
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M10 17l5-5-5-5"></path>
+                <path d="M15 12H3"></path>
+                <path d="M21 19V5a2 2 0 0 0-2-2h-6"></path>
+              </svg>
+            </button>
+          </nav>
+        </div>
+      </section>
+
+      <section id="menuTabs" class="my-6 hidden gap-4 md:grid-cols-4">
+        <button class="menu-tab" data-section="tracking">Tracking mapa</button>
         <button class="menu-tab" data-section="ayuda">Ayuda</button>
-        <button class="menu-tab" data-section="registro">Registro</button>
         <button class="menu-tab" data-section="informacion">Informacion</button>
         <button class="menu-tab" data-section="numeros">Numeros de emergencia</button>
       </section>
 
-      <section>
+      <section id="systemContent" class="hidden">
         <section id="contentPanel" class="rounded-lg border border-slate-200 bg-white p-6"></section>
       </section>
     </main>
+
+    <section
+      id="signupModal"
+      class="fixed inset-0 z-50 hidden items-center justify-center bg-emerald-950/35 px-4 py-8 backdrop-blur-md"
+      aria-hidden="true"
+    >
+      <div class="absolute inset-0" id="signupModalBackdrop"></div>
+      <article
+        class="relative max-h-[calc(100vh-48px)] w-full max-w-md overflow-y-auto rounded-2xl border border-white/70 bg-white/90 shadow-2xl shadow-emerald-950/25 backdrop-blur-2xl"
+      >
+        <div class="absolute inset-x-0 top-0 h-1 bg-[linear-gradient(90deg,#047857,#dc2626,#047857)]"></div>
+        <button
+          id="closeSignupModal"
+          class="absolute right-4 top-4 grid h-9 w-9 place-items-center rounded-full border border-white/70 bg-white/50 text-slate-500 shadow-sm backdrop-blur-xl transition hover:bg-white/80 hover:text-red-700"
+          type="button"
+          aria-label="Cerrar registro"
+        >
+          x
+        </button>
+
+        <header class="flex flex-col items-center space-y-2 px-8 pb-4 pt-8 text-center">
+          <div class="grid h-12 w-12 place-items-center rounded-xl bg-red-700 text-3xl font-black text-white shadow-lg shadow-red-900/20 ring-4 ring-red-50">
+            +
+          </div>
+          <h2 class="text-2xl font-semibold text-slate-950">Create an account</h2>
+          <p class="text-sm text-slate-500">
+            Welcome! Create an account to get started.
+          </p>
+        </header>
+
+        <form id="createAccountForm" class="grid gap-5 px-8 pb-6">
+          <label class="grid gap-2 text-sm font-bold text-emerald-950">
+            Role
+            <select
+              class="h-10 rounded-md border border-emerald-100 bg-white/85 px-3 text-sm text-slate-700 shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700"
+            >
+              <option>Product Designer</option>
+              <option>Developer</option>
+              <option>Product Manager</option>
+              <option>Emergency Coordinator</option>
+            </select>
+          </label>
+
+          <div class="grid grid-cols-2 gap-4">
+            <label class="grid gap-2 text-sm font-bold text-emerald-950">
+              First name
+              <input class="h-10 rounded-md border border-emerald-100 bg-white/85 px-3 text-sm shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700" />
+            </label>
+            <label class="grid gap-2 text-sm font-bold text-emerald-950">
+              Last name
+              <input class="h-10 rounded-md border border-emerald-100 bg-white/85 px-3 text-sm shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700" />
+            </label>
+          </div>
+
+          <label class="grid gap-2 text-sm font-bold text-emerald-950">
+            Username
+            <input class="h-10 rounded-md border border-emerald-100 bg-white/85 px-3 text-sm shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700" />
+          </label>
+
+          <label class="grid gap-2 text-sm font-bold text-emerald-950">
+            Email address
+            <input class="h-10 rounded-md border border-emerald-100 bg-white/85 px-3 text-sm shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700" type="email" />
+          </label>
+
+          <label class="grid gap-2 text-sm font-bold text-emerald-950">
+            Password
+            <span class="relative">
+              <input
+                id="modalPassword"
+                class="h-10 w-full rounded-md border border-emerald-100 bg-white/85 px-3 pr-12 text-sm shadow-sm outline-none transition focus:border-red-700 focus:ring-2 focus:ring-red-700"
+                type="password"
+              />
+              <button
+                id="toggleModalPassword"
+                class="absolute right-0 top-0 h-10 px-3 text-xs font-bold text-slate-500 transition hover:text-red-700"
+                type="button"
+              >
+                Show
+              </button>
+            </span>
+          </label>
+
+          <label class="flex items-start gap-3 text-sm text-slate-500">
+            <input
+              class="mt-1 h-4 w-4 rounded border-emerald-200 text-red-700 accent-red-700"
+              type="checkbox"
+            />
+            <span>
+              I agree to the <a href="#" class="font-bold text-red-700 hover:underline">Terms</a>
+              and <a href="#" class="font-bold text-red-700 hover:underline">Conditions</a>
+            </span>
+          </label>
+
+          <button
+            class="h-11 rounded-full border border-white/50 bg-[linear-gradient(135deg,rgba(255,255,255,.28),rgba(220,38,38,.82)_42%,rgba(153,27,27,.86))] px-4 text-sm font-bold text-white shadow-[inset_0_1px_0_rgba(255,255,255,.55),0_18px_42px_rgba(153,27,27,.24)] backdrop-blur-2xl transition hover:border-white/80 active:scale-[.98]"
+            type="submit"
+          >
+            Create free account
+          </button>
+        </form>
+
+        <footer class="border-t border-emerald-100 bg-emerald-50/70 px-8 py-4 text-center text-sm text-slate-500">
+          Already have an account?
+          <button id="signinFromModal" class="font-bold text-red-700 hover:underline" type="button">
+            Sign in
+          </button>
+        </footer>
+      </article>
+    </section>
 
     <script type="module" src="app.js"></script>
   </body>

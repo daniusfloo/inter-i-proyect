@@ -18,6 +18,12 @@ export function getMenuSections() {
         },
       ],
     },
+    tracking: {
+      title: "Tracking de ambulancias",
+      intro: "Mapa abierto con referencia de San Jose, hospitales y rutas principales.",
+      type: "tracking",
+      items: [],
+    },
     ayuda: {
       title: "Ayuda",
       intro: "Guia rapida para entender las pantallas disponibles.",
@@ -26,12 +32,6 @@ export function getMenuSections() {
         "atencion al cliente",
         "modo conducir",
       ],
-    },
-    registro: {
-      title: "Acceso a cuenta",
-      intro: "Formulario visual para iniciar sesion en el sistema.",
-      type: "login",
-      items: [],
     },
     informacion: {
       title: "Informacion",

@@ -3,6 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "build": "node scripts/build-frontends.mjs"
+    "build": "node scripts/build-frontends.mjs",
+    "dev": "node scripts/dev.mjs",
+    "start": "node scripts/dev.mjs",
+    "serve": "node scripts/serve-dist.mjs"
   }
 }

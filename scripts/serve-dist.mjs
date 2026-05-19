@@ -12,6 +12,12 @@ const mimeTypes = {
 createServer(async (request, response) => {
   try {
     const url = new URL(request.url, `http://127.0.0.1:${port}`);
+    if (url.pathname === "/") {
+      response.writeHead(302, { Location: "/menu/" });
+      response.end();
+      return;
+    }
+
     const requestPath = url.pathname.endsWith("/")
       ? `${url.pathname}index.html`
       : url.pathname;
