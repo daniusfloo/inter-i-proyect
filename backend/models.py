@@ -31,3 +31,13 @@ class Ambulance(BaseModel):
 class DispatchRequest(BaseModel):
     emergency_location: str
     priority: str = "high"
+
+
+class ChatRequest(BaseModel):
+    message: str
+    agent: str = "salud"
+
+
+class ChatResponse(BaseModel):
+    answer: str
+    model: str

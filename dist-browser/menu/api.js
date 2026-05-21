@@ -1,22 +1,32 @@
+const API_URL = "http://127.0.0.1:8001";
+
+async function request(path, options = {}) {
+  const response = await fetch(`${API_URL}${path}`, {
+    headers: { "Content-Type": "application/json" },
+    ...options,
+  });
+
+  if (!response.ok) {
+    throw new Error(`Request failed: ${response.status}`);
+  }
+
+  return response.json();
+}
+
+export function askHealthAi(message, agent) {
+  return request("/api/chat", {
+    method: "POST",
+    body: JSON.stringify({ message, agent }),
+  });
+}
+
 export function getMenuSections() {
   return {
     configuraciones: {
-      title: "Configuraciones",
+      title: "Ajustes",
       intro: "Opciones generales para preparar el uso del sistema.",
-      items: [
-        {
-          label: "configuraciones de alertas",
-          href: "alerts",
-        },
-        {
-          label: "configuracion de rutas",
-          href: "routes-config",
-        },
-        {
-          label: "configuracion de maps",
-          href: "maps-config",
-        },
-      ],
+      type: "settings",
+      items: [],
     },
     tracking: {
       title: "Tracking de ambulancias",
@@ -24,31 +34,12 @@ export function getMenuSections() {
       type: "tracking",
       items: [],
     },
-    ayuda: {
-      title: "Ayuda",
-      intro: "Guia rapida para entender las pantallas disponibles.",
+    directorio: {
+      title: "Directorio",
+      intro: "Telefonos de hospitales, clinicas y contactos medicos de Costa Rica.",
+      type: "directory",
       items: [
-        "no se puede iniciar sesion",
-        "atencion al cliente",
-        "modo conducir",
-      ],
-    },
-    informacion: {
-      title: "Informacion",
-      intro: "Datos generales de S.E.A.",
-      items: [
-        "S.E.A significa Servicio de Emergencia en Ambulancia.",
-        "El sistema muestra ambulancias, hospitales y ubicaciones de emergencia.",
-        "La vista de mensajes esta pensada para recibir informacion sin modificarla.",
-      ],
-    },
-    numeros: {
-      title: "Numeros de emergencia",
-      intro: "Contactos utiles para situaciones criticas.",
-      items: [
-        "Emergencias Costa Rica: 9-1-1.",
-        "Cruz Roja Costarricense: consulta local segun region.",
-        "Bomberos: 9-1-1 para atencion inmediata.",
+        "Fuente base: directorio publico de hospitales CCSS y directorios institucionales del Ministerio de Salud.",
       ],
     },
   };

@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from models import DispatchRequest
+from models import ChatRequest, DispatchRequest
 from services import (
+    ask_open_source_health_ai,
     get_ambulances,
     get_emergency_location,
     get_hospitals,
@@ -41,3 +42,8 @@ def dispatch(request: DispatchRequest):
 @router.post("/reset")
 def reset():
     return reset_simulation()
+
+
+@router.post("/chat")
+def chat(request: ChatRequest):
+    return ask_open_source_health_ai(request.message, request.agent)
