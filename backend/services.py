@@ -3,7 +3,7 @@ import os
 from urllib.error import URLError
 from urllib.request import Request, urlopen
 
-from models import Ambulance, EmergencyLocation, Hospital, TrafficLight
+from models import Ambulance, AmbulanceCreateRequest, EmergencyLocation, Hospital, TrafficLight
 
 traffic_lights = [
     TrafficLight(id=1, location="Avenida Central", status="red"),
@@ -12,8 +12,34 @@ traffic_lights = [
 ]
 
 ambulances = [
-    Ambulance(id=1, driver="Ana Perez", location="Base Norte", priority="medium", active=False),
-    Ambulance(id=2, driver="Luis Rojas", location="Base Sur", priority="low", active=False),
+    Ambulance(
+        id=1,
+        name="Unidad S.E.A-01",
+        model="Toyota Hiace",
+        zone="Base Norte",
+        province="San Jose",
+        staff_count=3,
+        preferred_hospital="Hospital Mexico",
+        company="S.E.A",
+        driver="Ana Perez",
+        location="Base Norte",
+        priority="medium",
+        active=False,
+    ),
+    Ambulance(
+        id=2,
+        name="Unidad S.E.A-02",
+        model="Mercedes-Benz Sprinter",
+        zone="Base Sur",
+        province="San Jose",
+        staff_count=2,
+        preferred_hospital="Hospital San Juan de Dios",
+        company="S.E.A",
+        driver="Luis Rojas",
+        location="Base Sur",
+        priority="low",
+        active=False,
+    ),
 ]
 
 hospitals = [
@@ -35,6 +61,13 @@ def get_traffic_lights():
 
 def get_ambulances():
     return ambulances
+
+
+def add_ambulance(request: AmbulanceCreateRequest):
+    next_id = max((ambulance.id for ambulance in ambulances), default=0) + 1
+    ambulance = Ambulance(id=next_id, **request.model_dump())
+    ambulances.append(ambulance)
+    return ambulance
 
 
 def get_hospitals():
@@ -115,7 +148,7 @@ def ask_open_source_health_ai(message: str, agent: str = "salud"):
     try:
         with urlopen(request, timeout=45) as response:
             data = json.loads(response.read().decode("utf-8"))
-    except URLError as exc:
+    except URLError:
         return {
             "answer": get_basic_health_ai_answer(message, agent),
             "model": "sea-basic-open-ai",
@@ -158,7 +191,7 @@ def get_basic_health_ai_answer(message: str, agent: str = "salud"):
 
     if any(word in text for word in ["ruta", "ambulancia", "traslado", "mapa", "llegar"]):
         return (
-            "Para una ruta de ambulancia en Costa Rica, usa Tracking en mapa: escribe punto de origen y destino "
+            "Para una ruta de ambulancia en Costa Rica, entra a Inicio y escribe punto de origen y destino "
             "con nombres especificos, por ejemplo Hospital Mexico u Hospital Calderon Guardia. "
             "Verifica siempre la ruta con condiciones reales de transito."
         )

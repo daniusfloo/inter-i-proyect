@@ -1,4 +1,4 @@
-import { askHealthAi, getMenuSections } from "./api.js";
+import { askHealthAi, createAmbulance, getAmbulances, getMenuSections } from "./api.js";
 
 const tabs = document.querySelectorAll(".menu-tab");
 const contentPanel = document.querySelector("#contentPanel");
@@ -40,18 +40,19 @@ const sections = getMenuSections();
 const translations = {
   es: {
     navHome: "Inicio",
-    navTracking: "Tracking en mapa",
+    navTracking: "Ambulancias",
+    navPeople: "Personas",
     navDirectory: "Directorio",
     navSettings: "Ajustes",
     emergency: "EMERGENCIA 911",
     heroTitle: "S.E.A: Servicio de Emergencia en Ambulancia",
-    heroSubtitle: "Sistema para monitorear ambulancias, rutas y mensajes de emergencia.",
+    heroSubtitle: "Sistema para coordinar ambulancias, personal y mensajes de emergencia.",
     coverageTitle: "Cobertura",
     coverageText: "San Jose y Alajuela",
     reliableTitle: "Confiable",
-    reliableText: "Datos en tiempo real",
+    reliableText: "Datos operativos",
     updatedTitle: "Actualizado",
-    updatedText: "Informacion 24/7",
+    updatedText: "Panel 24/7",
     supportTitle: "Soporte",
     supportText: "Equipo profesional",
     settingsTitle: "Ajustes",
@@ -87,18 +88,19 @@ const translations = {
   },
   en: {
     navHome: "Home",
-    navTracking: "Live map",
+    navTracking: "Ambulances",
+    navPeople: "People",
     navDirectory: "Directory",
     navSettings: "Settings",
     emergency: "EMERGENCY 911",
     heroTitle: "S.E.A: Ambulance Emergency Service",
-    heroSubtitle: "System for monitoring ambulances, routes, and emergency messages.",
+    heroSubtitle: "System for coordinating ambulances, staff, and emergency messages.",
     coverageTitle: "Coverage",
     coverageText: "San Jose and Alajuela",
     reliableTitle: "Reliable",
-    reliableText: "Real-time data",
+    reliableText: "Operational data",
     updatedTitle: "Updated",
-    updatedText: "24/7 information",
+    updatedText: "24/7 panel",
     supportTitle: "Support",
     supportText: "Professional team",
     settingsTitle: "Settings",
@@ -135,17 +137,31 @@ const translations = {
 };
 let currentLanguage = localStorage.getItem("seaLanguage") || "es";
 let currentTheme = localStorage.getItem("seaTheme") || "light";
-const costaRicaCenter = [9.9361, -84.0804];
+let isHelpOpen = false;
+let homeTrackingMap = null;
+let homeTrackingRouteLayer = null;
+let homeTrackingMarkerLayer = null;
 const costaRicaBounds = [
   [8.03, -85.95],
   [11.22, -82.45],
 ];
-let trackingMap;
-let trackingRouteLayer;
-let trackingMarkerLayer;
-let startSelectedPlace = null;
-let endSelectedPlace = null;
-let isHelpOpen = false;
+const knownCostaRicaPlaces = [
+  { keywords: ["hospital mexico", "mexico"], label: "Hospital Mexico, San Jose, Costa Rica", latitude: 9.9616, longitude: -84.1149 },
+  { keywords: ["hospital calderon guardia", "calderon"], label: "Hospital Calderon Guardia, San Jose, Costa Rica", latitude: 9.9367, longitude: -84.0667 },
+  { keywords: ["hospital san juan de dios", "san juan"], label: "Hospital San Juan de Dios, San Jose, Costa Rica", latitude: 9.9342, longitude: -84.0869 },
+  { keywords: ["hospital san rafael", "san rafael"], label: "Hospital San Rafael, Alajuela, Costa Rica", latitude: 10.0162, longitude: -84.2144 },
+  { keywords: ["hospital nacional de ninos", "hospital de ninos", "ninos"], label: "Hospital Nacional de Ninos, San Jose, Costa Rica", latitude: 9.9339, longitude: -84.0858 },
+  { keywords: ["clinica biblica", "biblica"], label: "Clinica Biblica, San Jose, Costa Rica", latitude: 9.9289, longitude: -84.0758 },
+  { keywords: ["san jose", "san jose centro"], label: "San Jose, Costa Rica", latitude: 9.9281, longitude: -84.0907 },
+  { keywords: ["alajuela"], label: "Alajuela, Costa Rica", latitude: 10.0162, longitude: -84.2116 },
+  { keywords: ["cartago"], label: "Cartago, Costa Rica", latitude: 9.8644, longitude: -83.9194 },
+  { keywords: ["heredia"], label: "Heredia, Costa Rica", latitude: 9.9981, longitude: -84.1198 },
+  { keywords: ["limon", "puerto limon"], label: "Limon, Costa Rica", latitude: 9.9911, longitude: -83.0350 },
+  { keywords: ["puntarenas"], label: "Puntarenas, Costa Rica", latitude: 9.9763, longitude: -84.8384 },
+  { keywords: ["guanacaste", "liberia"], label: "Liberia, Guanacaste, Costa Rica", latitude: 10.6346, longitude: -85.4407 },
+  { keywords: ["san carlos", "ciudad quesada"], label: "Ciudad Quesada, San Carlos, Costa Rica", latitude: 10.3238, longitude: -84.4271 },
+  { keywords: ["perez zeledon", "san isidro"], label: "San Isidro de El General, Costa Rica", latitude: 9.3721, longitude: -83.7039 },
+];
 const helpAgents = {
   salud: {
     name: "IA S.E.A",
@@ -222,6 +238,74 @@ let directoryEntries = [
   { title: "A.R.S. Hospital Mata Redonda", phone: "4003-7130", category: "Clinica / area de salud" },
   { title: "A.R.S. Montes de Oca", phone: "4003-7160", category: "Clinica / area de salud" },
 ];
+let peopleEntries = [
+  {
+    name: "Ana Perez",
+    role: "Paramedica",
+    zone: "Base Norte",
+    phone: "8888-0101",
+    status: "Disponible",
+    condition: "Sin enfermedad registrada",
+    emergencyContact: "Mario Perez - 8999-0101",
+    shift: "Diurno",
+    company: "S.E.A",
+    latitude: 9.9629,
+    longitude: -84.0879,
+  },
+  {
+    name: "Luis Rojas",
+    role: "Conductor",
+    zone: "Base Sur",
+    phone: "8888-0202",
+    status: "En turno",
+    condition: "Hipertension controlada",
+    emergencyContact: "Carolina Rojas - 8999-0202",
+    shift: "Nocturno",
+    company: "S.E.A",
+    latitude: 9.8728,
+    longitude: -84.0719,
+  },
+  {
+    name: "Mariana Solis",
+    role: "Coordinadora",
+    zone: "Central",
+    phone: "8888-0303",
+    status: "Disponible",
+    condition: "Sin enfermedad registrada",
+    emergencyContact: "Andres Solis - 8999-0303",
+    shift: "Mixto",
+    company: "S.E.A",
+    latitude: 9.9325,
+    longitude: -84.08,
+  },
+];
+let criticalPeopleEntries = [
+  {
+    fullName: "Carlos Mendez Vargas",
+    idNumber: "1-1234-0567",
+    phone: "8888-1100",
+    residence: "San Jose, Hospital, Barrio Mexico",
+    emergencyContact: "Laura Vargas - 8999-1100",
+    condition: "Diabetes tipo 1",
+    insurance: "CCSS activo",
+    preferredHospital: "Hospital Mexico",
+    latitude: 9.9402,
+    longitude: -84.0966,
+  },
+  {
+    fullName: "Sofia Rojas Alfaro",
+    idNumber: "2-0987-0456",
+    phone: "8888-2200",
+    residence: "Alajuela, Centro, El Carmen",
+    emergencyContact: "Mario Rojas - 8999-2200",
+    condition: "Asma severa",
+    insurance: "INS privado",
+    preferredHospital: "Hospital San Rafael",
+    latitude: 10.0162,
+    longitude: -84.2144,
+  },
+];
+let currentPeopleDirectoryTab = "staff";
 
 const activeTabClasses = [
   "border-blue-600",
@@ -255,8 +339,9 @@ function applyPreferences() {
   document.documentElement.style.colorScheme = currentTheme === "dark" ? "dark" : "light";
 
   const navLabels = [
-    ["tracking", t("navHome")],
+    ["inicio", t("navHome")],
     ["tracking", t("navTracking")],
+    ["personas", t("navPeople")],
     ["directorio", t("navDirectory")],
     ["configuraciones", t("navSettings")],
   ];
@@ -318,8 +403,7 @@ function renderSection(sectionId) {
   if (!signupScreen || signupScreen.classList.contains("hidden")) {
     localStorage.setItem("seaSection", sectionId);
   }
-  const showMainHero = sectionId === "tracking";
-  menuHero.classList.toggle("hidden", !showMainHero);
+  menuHero.classList.add("hidden");
 
   tabs.forEach((tab) => {
     const isActive = tab.dataset.section === sectionId;
@@ -327,103 +411,151 @@ function renderSection(sectionId) {
     tab.classList.add(...(isActive ? activeTabClasses : inactiveTabClasses));
   });
 
-  if (section.type === "tracking") {
+  if (section.type === "home") {
     contentPanel.innerHTML = `
       <div class="grid gap-7">
-        <div class="grid gap-5 lg:grid-cols-[380px_1fr]">
-          <aside class="grid content-start gap-4">
-            <form id="routeSearchForm" class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
-              <p class="flex items-center gap-2 text-xs font-black uppercase text-red-600">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4v5h5"/><path d="M20 20v-5h-5"/><path d="M5 19A9 9 0 0 1 19 5"/><path d="M19 5h-5"/><path d="M5 19h5"/></svg>
-                Calcular ruta
-              </p>
-              <h2 class="mt-4 text-2xl font-black text-[#071836]">A donde vamos?</h2>
-              <p class="mt-4 text-sm leading-6 text-slate-600">Ingresa el punto de origen y destino para calcular la mejor ruta para la ambulancia.</p>
+        <section class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_52%,#e21d2d_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
+          <p class="text-sm font-black uppercase text-red-100">Rastreador abierto</p>
+          <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Inicio</h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
+            Mapa de Costa Rica para revisar rutas entre origen y destino usando herramientas abiertas.
+          </p>
+        </section>
 
+        <div class="grid gap-5 lg:grid-cols-[360px_1fr]">
+          <aside class="grid content-start gap-4">
+            <form id="homeRouteForm" class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+              <p class="text-xs font-black uppercase text-red-600">Calcular ruta</p>
+              <h2 class="mt-2 text-2xl font-black text-[#071836]">Rastreador de mapa</h2>
+              <p class="mt-3 text-sm leading-6 text-slate-600">Escribe un punto de origen y destino para dibujar la ruta.</p>
               <label class="mt-6 grid gap-2 text-sm font-bold text-[#071836]">
-                Punto de origen
-                <span class="relative">
-                  <input
-                    id="routeStartInput"
-                    class="min-h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    placeholder="Ej: Hospital Mexico"
-                    value="Hospital Mexico"
-                    autocomplete="off"
-                  />
-                  <div id="routeStartOptions" class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 hidden max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl"></div>
-                </span>
+                Origen
+                <input id="homeRouteStartInput" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" value="Hospital Mexico" required />
               </label>
-              <label class="mt-5 grid gap-2 text-sm font-bold text-[#071836]">
-                Punto de destino
-                <span class="relative">
-                  <input
-                    id="routeEndInput"
-                    class="min-h-12 w-full rounded-md border border-slate-200 bg-white px-4 text-slate-900 shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
-                    placeholder="Ej: Hospital Calderon Guardia"
-                    value="Hospital Calderon Guardia"
-                    autocomplete="off"
-                  />
-                  <div id="routeEndOptions" class="absolute left-0 right-0 top-[calc(100%+6px)] z-30 hidden max-h-64 overflow-y-auto rounded-lg border border-slate-200 bg-white shadow-xl"></div>
-                </span>
+              <label class="mt-4 grid gap-2 text-sm font-bold text-[#071836]">
+                Destino
+                <input id="homeRouteEndInput" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" value="Hospital Calderon Guardia" required />
               </label>
-              <button class="mt-7 inline-flex min-h-12 w-full items-center justify-center gap-2 rounded-md bg-red-600 px-5 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3z"/><path d="M14 10h3l3 3v3h-6z"/><circle cx="7" cy="18" r="2"/><circle cx="17" cy="18" r="2"/></svg>
+              <button class="mt-6 inline-flex min-h-11 w-full items-center justify-center rounded-md bg-red-600 px-5 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
                 Calcular ruta
               </button>
             </form>
-
-            <p id="routeSearchStatus" class="rounded-lg border border-slate-200 bg-white px-5 py-4 text-sm font-bold leading-6 text-slate-700 shadow-sm">
-              Ruta optimizada: basada en trafico en tiempo real y condiciones actuales de las vias.
+            <p id="homeRouteStatus" class="rounded-lg border border-slate-200 bg-white px-5 py-4 text-sm font-bold leading-6 text-slate-700 shadow-sm">
+              Mapa con OpenStreetMap, Leaflet y OSRM.
             </p>
           </aside>
-
-          <section class="map-card overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70">
+          <section class="overflow-hidden rounded-lg border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70">
             <div class="mb-4 flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-              <p class="flex items-center gap-2 text-sm font-black uppercase text-blue-700">
-                <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m3 6 6-3 6 3 6-3v15l-6 3-6-3-6 3V6z"/><path d="M9 3v15"/><path d="M15 6v15"/></svg>
-                Mapa en tiempo real
-              </p>
-              <div class="flex gap-3 text-sm font-bold">
-                <span class="inline-flex min-h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-slate-700">
-                  <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><path d="M3 13h18l-2-6H5l-2 6z"/><path d="M5 13v5"/><path d="M19 13v5"/><circle cx="7" cy="18" r="1.5"/><circle cx="17" cy="18" r="1.5"/></svg>
-                  Trafico
-                </span>
-                <span class="inline-flex min-h-10 items-center gap-2 rounded-md border border-slate-200 bg-white px-4 text-slate-700">
-                  <span class="h-2.5 w-2.5 rounded-full bg-emerald-500"></span>
-                  En vivo
-                </span>
-              </div>
+              <p class="text-sm font-black uppercase text-blue-700">Mapa de Costa Rica</p>
+              <span class="rounded-md border border-slate-200 bg-slate-50 px-4 py-2 text-sm font-bold text-slate-700">Codigo abierto</span>
             </div>
             <div class="overflow-hidden rounded-md border border-slate-100 bg-slate-50">
-              <div id="trackingMap" class="relative z-0 w-full bg-white"></div>
+              <div id="homeTrackingMap"></div>
             </div>
           </section>
         </div>
-
-        <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-          ${renderQuickCard("tracking", "Tracking en mapa", "Ver ambulancias en tiempo real", "blue")}
-          ${renderQuickCard("directorio", "Directorio", "Hospitales y clinicas", "red")}
-          ${renderQuickCard("configuraciones", "Ajustes", "Configurar alertas y mapas", "green")}
-          ${renderQuickCard("directorio", "Agregar contacto", "Guardar nuevo numero", "purple")}
-        </div>
-
-        <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-lg shadow-slate-200/60">
-          <p class="text-sm font-black uppercase text-blue-700">Informacion</p>
-          <h2 class="mt-2 text-2xl font-black text-[#071836]">S.E.A: Servicio de Emergencia en Ambulancia</h2>
-          <div class="mt-4 grid gap-4 text-sm leading-6 text-slate-600 md:grid-cols-3">
-            <p>S.E.A significa Servicio de Emergencia en Ambulancia.</p>
-            <p>El sistema muestra ambulancias, hospitales y ubicaciones de emergencia.</p>
-            <p>El directorio permite consultar y agregar contactos medicos importantes.</p>
-          </div>
-        </section>
       </div>
     `;
-    contentPanel.querySelectorAll(".quick-card").forEach((card) => {
-      card.addEventListener("click", () => {
-        renderSection(card.dataset.section);
-      });
-    });
-    requestAnimationFrame(setupTrackingMap);
+    requestAnimationFrame(setupHomeTrackingMap);
+    return;
+  }
+
+  if (section.type === "tracking") {
+    contentPanel.innerHTML = `
+      <div class="grid gap-7">
+        <section class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_52%,#e21d2d_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
+          <div class="grid gap-7 lg:grid-cols-[1fr_340px] lg:items-end">
+            <div>
+              <p class="text-sm font-black uppercase text-red-100">Servicio de Emergencia en Ambulancia</p>
+              <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Ambulancias S.E.A.</h1>
+              <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
+                Panel de flota para revisar unidades, conductores y disponibilidad operativa de la empresa.
+              </p>
+            </div>
+            <div class="grid gap-3 rounded-lg border border-white/15 bg-white/10 p-5 backdrop-blur-md">
+              <p class="text-sm font-bold text-blue-50">Estado general</p>
+              <div class="grid grid-cols-2 gap-3">
+                <article class="rounded-lg bg-white/12 p-4">
+                  <p id="ambulanceAvailableCount" class="text-3xl font-black">--</p>
+                  <p class="mt-1 text-xs font-bold uppercase text-blue-50">Disponibles</p>
+                </article>
+                <article class="rounded-lg bg-white/12 p-4">
+                  <p id="ambulanceActiveCount" class="text-3xl font-black">--</p>
+                  <p class="mt-1 text-xs font-bold uppercase text-blue-50">En servicio</p>
+                </article>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div>
+              <p class="text-sm font-black uppercase text-red-600">Registro</p>
+              <h2 class="mt-1 text-2xl font-black text-[#071836]">Agregar ambulancia</h2>
+            </div>
+            <button id="toggleAmbulanceFormBtn" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[.98]" type="button">
+              <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+              Agregar ambulancia
+            </button>
+          </div>
+
+          <form id="ambulanceForm" class="mt-6 hidden grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+            ${renderAmbulanceInput("ambulanceNameInput", "Nombre", "Unidad S.E.A-03")}
+            ${renderAmbulanceInput("ambulanceModelInput", "Modelo", "Toyota Hiace")}
+            ${renderAmbulanceInput("ambulanceZoneInput", "Zona", "Base Este")}
+            ${renderAmbulanceInput("ambulanceProvinceInput", "Provincia", "San Jose")}
+            ${renderAmbulanceInput("ambulanceStaffInput", "Cantidad de personal", "3", "number")}
+            ${renderAmbulanceInput("ambulanceHospitalInput", "Hospital de preferencia", "Hospital Mexico")}
+            ${renderAmbulanceInput("ambulanceCompanyInput", "Compania", "S.E.A")}
+            <button class="self-end rounded-md bg-red-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
+              Guardar ambulancia
+            </button>
+          </form>
+        </section>
+
+        <div class="grid gap-5">
+          <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+            <div class="flex flex-col justify-between gap-4 md:flex-row md:items-end">
+              <div>
+                <p class="text-sm font-black uppercase text-blue-700">Flota</p>
+                <h2 class="mt-1 text-3xl font-black text-[#071836]">Ambulancias registradas</h2>
+                <p class="mt-2 text-sm text-slate-500">Unidades con nombre, modelo, zona, provincia, personal, hospital y compania.</p>
+              </div>
+            </div>
+            <div id="ambulanceFleetList" class="mt-6 grid gap-4 md:grid-cols-2"></div>
+          </section>
+        </div>
+
+      </div>
+    `;
+    setupAmbulancePage();
+    return;
+  }
+
+  if (section.type === "people") {
+    contentPanel.innerHTML = `
+      <section class="grid gap-6">
+        <div class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_56%,#2563eb_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
+          <p class="text-sm font-black uppercase text-blue-100">Directorio</p>
+          <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Personas</h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
+            Directorio interno para personal operativo y personas registradas con salud critica.
+          </p>
+        </div>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+          <div class="grid min-h-12 grid-cols-3 rounded-md bg-slate-100 p-1 text-sm font-black text-slate-600 md:w-[620px]">
+            <button class="people-directory-tab rounded px-4 transition" data-people-tab="staff" type="button">Personal</button>
+            <button class="people-directory-tab rounded px-4 transition" data-people-tab="critical" type="button">Salud critica</button>
+            <button class="people-directory-tab rounded px-4 transition" data-people-tab="map" type="button">Mapa</button>
+          </div>
+
+          <div id="peopleDirectoryContent" class="mt-6"></div>
+        </section>
+      </section>
+    `;
+    setupPeoplePage();
     return;
   }
 
@@ -542,58 +674,797 @@ function renderSection(sectionId) {
     return;
   }
 
-  contentPanel.innerHTML = `
-    <div class="grid gap-7">
-      <section class="rounded-lg border border-slate-200 bg-white p-7 shadow-xl shadow-slate-200/70">
-        <p class="text-sm font-black uppercase text-red-600">Seccion</p>
-        <h2 class="mt-1 text-3xl font-black text-[#071836]">${section.title}</h2>
-        <p class="mt-2 max-w-2xl text-slate-500">${section.intro}</p>
+  renderSection("inicio");
+}
 
-        <div class="mt-6 grid gap-3">
-        ${section.items
-          .map(
-            (item) => `
-              <article class="rounded-lg border border-slate-200 bg-slate-50 p-4 shadow-sm">
-                ${renderSectionItem(item)}
-              </article>
-            `,
-          )
-          .join("")}
+function setupHomeTrackingMap() {
+  const mapElement = document.querySelector("#homeTrackingMap");
+  const form = document.querySelector("#homeRouteForm");
+  const status = document.querySelector("#homeRouteStatus");
+  const startInput = document.querySelector("#homeRouteStartInput");
+  const endInput = document.querySelector("#homeRouteEndInput");
+
+  if (!mapElement) {
+    return;
+  }
+
+  if (mapElement.clientWidth === 0 || mapElement.clientHeight === 0) {
+    setTimeout(setupHomeTrackingMap, 80);
+    return;
+  }
+
+  if (typeof L === "undefined") {
+    mapElement.innerHTML = `<p class="p-6 text-sm font-bold text-slate-600">No se pudo cargar Leaflet.</p>`;
+    return;
+  }
+
+  if (homeTrackingMap) {
+    homeTrackingMap.off();
+    homeTrackingMap.remove();
+    homeTrackingMap = null;
+  }
+
+  homeTrackingMap = L.map(mapElement, {
+    attributionControl: false,
+    maxBounds: costaRicaBounds,
+    maxBoundsViscosity: 0.75,
+    preferCanvas: false,
+    scrollWheelZoom: true,
+    zoomControl: true,
+  });
+
+  homeTrackingMap.createPane("seaRoutePane");
+  homeTrackingMap.getPane("seaRoutePane").classList.add("sea-route-pane");
+  homeTrackingMap.getPane("seaRoutePane").style.zIndex = "650";
+  homeTrackingMap.createPane("seaMarkerPane");
+  homeTrackingMap.getPane("seaMarkerPane").classList.add("sea-marker-pane");
+  homeTrackingMap.getPane("seaMarkerPane").style.zIndex = "700";
+
+  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
+    maxZoom: 19,
+    minZoom: 7,
+    subdomains: "abcd",
+    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
+    crossOrigin: true,
+  }).addTo(homeTrackingMap);
+
+  homeTrackingMap.fitBounds(costaRicaBounds, { padding: [22, 22] });
+  mapElement.dataset.leafletReady = "true";
+
+  const calculateRoute = async () => {
+    status.textContent = "Buscando ubicaciones y calculando ruta...";
+    try {
+      const start = await geocodeCostaRica(startInput.value);
+      const end = await geocodeCostaRica(endInput.value);
+      const localRoute = getFallbackRoute(start, end);
+      renderHomeTrackingRoute(start, end, localRoute);
+      status.textContent = `Ruta estimada con respaldo local: ${(localRoute.distance / 1000).toFixed(1)} km, ${(localRoute.duration / 60).toFixed(0)} min aprox.`;
+
+      const route = await getOsrmRoute(start, end);
+      renderHomeTrackingRoute(start, end, route);
+      const isEstimated = route.fallback || start.estimated || end.estimated;
+      status.textContent = isEstimated
+        ? `Ruta estimada con respaldo local: ${(route.distance / 1000).toFixed(1)} km, ${(route.duration / 60).toFixed(0)} min aprox.`
+        : `Ruta calculada: ${(route.distance / 1000).toFixed(1)} km, ${(route.duration / 60).toFixed(0)} min aprox.`;
+    } catch (error) {
+      status.textContent = "No se pudo ubicar ese punto. Prueba con hospital, canton o provincia de Costa Rica.";
+    }
+  };
+
+  form?.addEventListener("submit", async (event) => {
+    event.preventDefault();
+    await calculateRoute();
+  });
+
+  fitHomeTrackingMap();
+  setTimeout(fitHomeTrackingMap, 120);
+  setTimeout(fitHomeTrackingMap, 350);
+  setTimeout(fitHomeTrackingMap, 800);
+  setTimeout(calculateRoute, 900);
+}
+
+function fitHomeTrackingMap() {
+  if (!homeTrackingMap) {
+    return;
+  }
+
+  homeTrackingMap.invalidateSize(true);
+  if (!homeTrackingRouteLayer) {
+    homeTrackingMap.fitBounds(costaRicaBounds, { padding: [22, 22] });
+  }
+}
+
+async function geocodeCostaRica(query) {
+  const cleanQuery = String(query || "").trim();
+  if (!cleanQuery) {
+    throw new Error("Empty location");
+  }
+
+  const knownPlace = findKnownCostaRicaPlace(query);
+  if (knownPlace) {
+    return knownPlace;
+  }
+
+  const url = new URL("https://nominatim.openstreetmap.org/search");
+  url.searchParams.set("format", "jsonv2");
+  url.searchParams.set("limit", "1");
+  url.searchParams.set("countrycodes", "cr");
+  url.searchParams.set("q", `${query}, Costa Rica`);
+
+  try {
+    const response = await fetchWithTimeout(url.toString(), {}, 5500);
+    if (!response.ok) {
+      throw new Error("Geocoding failed");
+    }
+
+    const results = await response.json();
+    if (!results.length) {
+      throw new Error("Location not found");
+    }
+
+    return {
+      label: results[0].display_name,
+      latitude: Number(results[0].lat),
+      longitude: Number(results[0].lon),
+    };
+  } catch (error) {
+    return getFallbackCostaRicaPlace(cleanQuery);
+  }
+}
+
+function findKnownCostaRicaPlace(query) {
+  const normalizedQuery = normalizeSearchText(query);
+  if (!normalizedQuery) {
+    return null;
+  }
+
+  return (
+    knownCostaRicaPlaces.find((place) =>
+      place.keywords.some((keyword) => doesSearchMatchPlace(normalizedQuery, keyword)),
+    ) || null
+  );
+}
+
+function doesSearchMatchPlace(normalizedQuery, keyword) {
+  const normalizedKeyword = normalizeSearchText(keyword);
+  const queryTokens = normalizedQuery.split(/\s+/).filter(Boolean);
+  const keywordTokens = normalizedKeyword.split(/\s+/).filter(Boolean);
+
+  return (
+    normalizedQuery.includes(normalizedKeyword) ||
+    normalizedKeyword.includes(normalizedQuery) ||
+    keywordTokens.every((token) => queryTokens.includes(token))
+  );
+}
+
+function getFallbackCostaRicaPlace(query) {
+  const normalizedQuery = normalizeSearchText(query);
+  const provinceFallbacks = [
+    { keywords: ["san jose", "sj"], label: "San Jose, Costa Rica", latitude: 9.9281, longitude: -84.0907 },
+    { keywords: ["alajuela"], label: "Alajuela, Costa Rica", latitude: 10.0162, longitude: -84.2116 },
+    { keywords: ["cartago"], label: "Cartago, Costa Rica", latitude: 9.8644, longitude: -83.9194 },
+    { keywords: ["heredia"], label: "Heredia, Costa Rica", latitude: 9.9981, longitude: -84.1198 },
+    { keywords: ["guanacaste"], label: "Guanacaste, Costa Rica", latitude: 10.6267, longitude: -85.4437 },
+    { keywords: ["puntarenas"], label: "Puntarenas, Costa Rica", latitude: 9.9763, longitude: -84.8384 },
+    { keywords: ["limon"], label: "Limon, Costa Rica", latitude: 9.9911, longitude: -83.0350 },
+  ];
+  const province = provinceFallbacks.find((place) =>
+    place.keywords.some((keyword) => doesSearchMatchPlace(normalizedQuery, keyword)),
+  );
+
+  if (province) {
+    return {
+      ...province,
+      label: `${query} - ubicacion estimada cerca de ${province.label}`,
+      estimated: true,
+    };
+  }
+
+  const hash = [...normalizedQuery].reduce((total, character) => total + character.charCodeAt(0), 0);
+  return {
+    label: `${query} - ubicacion estimada en Costa Rica`,
+    latitude: 9.84 + ((hash % 46) - 23) / 100,
+    longitude: -84.12 + (((hash * 7) % 54) - 27) / 100,
+    estimated: true,
+  };
+}
+
+async function getOsrmRoute(start, end) {
+  const coordinates = `${start.longitude},${start.latitude};${end.longitude},${end.latitude}`;
+  const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
+
+  try {
+    const response = await fetchWithTimeout(url, {}, 5500);
+
+    if (!response.ok) {
+      throw new Error("Route failed");
+    }
+
+    const data = await response.json();
+    if (!data.routes?.[0]) {
+      throw new Error("Route not found");
+    }
+
+    return data.routes[0];
+  } catch (error) {
+    return getFallbackRoute(start, end);
+  }
+}
+
+function getFallbackRoute(start, end) {
+  const directDistance = getDistanceMeters(start, end);
+  const roadDistance = directDistance * 1.32;
+  const duration = roadDistance / (42 * 1000 / 3600);
+
+  return {
+    fallback: true,
+    distance: roadDistance,
+    duration,
+    geometry: {
+      coordinates: buildFallbackRouteCoordinates(start, end),
+    },
+  };
+}
+
+function buildFallbackRouteCoordinates(start, end) {
+  const midLatitude = (start.latitude + end.latitude) / 2 + 0.045;
+  const midLongitude = (start.longitude + end.longitude) / 2 - 0.035;
+
+  return [
+    [start.longitude, start.latitude],
+    [midLongitude, midLatitude],
+    [end.longitude, end.latitude],
+  ];
+}
+
+function getDistanceMeters(start, end) {
+  const earthRadiusMeters = 6371000;
+  const startLatitude = toRadians(start.latitude);
+  const endLatitude = toRadians(end.latitude);
+  const latitudeDelta = toRadians(end.latitude - start.latitude);
+  const longitudeDelta = toRadians(end.longitude - start.longitude);
+  const haversine =
+    Math.sin(latitudeDelta / 2) ** 2 +
+    Math.cos(startLatitude) * Math.cos(endLatitude) * Math.sin(longitudeDelta / 2) ** 2;
+
+  return earthRadiusMeters * 2 * Math.atan2(Math.sqrt(haversine), Math.sqrt(1 - haversine));
+}
+
+function toRadians(value) {
+  return (value * Math.PI) / 180;
+}
+
+function normalizeSearchText(value) {
+  return String(value || "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+}
+
+function fetchWithTimeout(url, options = {}, timeoutMs = 5000) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  return fetch(url, { ...options, signal: controller.signal }).finally(() => clearTimeout(timeout));
+}
+
+function renderHomeTrackingRoute(start, end, route) {
+  if (homeTrackingRouteLayer) {
+    homeTrackingRouteLayer.remove();
+  }
+  if (homeTrackingMarkerLayer) {
+    homeTrackingMarkerLayer.remove();
+  }
+
+  const points = route.geometry.coordinates.map(([longitude, latitude]) => [latitude, longitude]);
+  const routeOutline = L.polyline(points, {
+    color: "#ffffff",
+    opacity: 0.98,
+    pane: "seaRoutePane",
+    weight: 12,
+  });
+  const routeLine = L.polyline(points, {
+    color: route.fallback ? "#e21d2d" : "#2563eb",
+    dashArray: route.fallback ? "14 10" : null,
+    lineCap: "round",
+    lineJoin: "round",
+    opacity: 1,
+    pane: "seaRoutePane",
+    weight: 6,
+  });
+  homeTrackingRouteLayer = L.featureGroup([routeOutline, routeLine]).addTo(homeTrackingMap);
+
+  homeTrackingMarkerLayer = L.layerGroup([
+    L.marker([start.latitude, start.longitude], { icon: createMapMarkerIcon("#2563eb"), pane: "seaMarkerPane" }).bindPopup(`Origen: ${start.label}`),
+    L.marker([end.latitude, end.longitude], { icon: createMapMarkerIcon("#dc2626"), pane: "seaMarkerPane" }).bindPopup(`Destino: ${end.label}`),
+  ]).addTo(homeTrackingMap);
+
+  homeTrackingMap.fitBounds(homeTrackingRouteLayer.getBounds(), { padding: [34, 34] });
+}
+
+function createMapMarkerIcon(color) {
+  return L.divIcon({
+    className: "sea-map-marker",
+    html: `
+      <svg width="34" height="42" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M17 41C17 41 31 26.6 31 15.8C31 7.6 24.7 1 17 1C9.3 1 3 7.6 3 15.8C3 26.6 17 41 17 41Z" fill="${color}" stroke="white" stroke-width="3"/>
+        <circle cx="17" cy="16" r="5.5" fill="white"/>
+      </svg>
+    `,
+    iconAnchor: [17, 41],
+    iconSize: [34, 42],
+    popupAnchor: [0, -38],
+  });
+}
+
+function renderAmbulanceInput(id, label, placeholder, type = "text") {
+  return `
+    <label class="grid gap-2 text-sm font-bold text-[#071836]">
+      ${label}
+      <input id="${id}" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" min="1" placeholder="${placeholder}" required type="${type}" />
+    </label>
+  `;
+}
+
+function renderPeopleInput(id, label, placeholder, type = "text") {
+  return `
+    <label class="grid gap-2 text-sm font-bold text-[#071836]">
+      ${label}
+      <input id="${id}" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" placeholder="${placeholder}" required type="${type}" />
+    </label>
+  `;
+}
+
+function setupPeoplePage() {
+  renderPeopleDirectory();
+}
+
+function handlePeopleFormSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  peopleEntries = [
+    {
+      name: document.querySelector("#personNameInput").value.trim(),
+      role: document.querySelector("#personRoleInput").value.trim(),
+      zone: document.querySelector("#personZoneInput").value.trim(),
+      phone: document.querySelector("#personPhoneInput").value.trim(),
+      status: "Disponible",
+      condition: "Sin enfermedad registrada",
+      emergencyContact: "No registrado",
+      shift: "Sin turno asignado",
+      company: "S.E.A",
+      latitude: 9.9325,
+      longitude: -84.08,
+    },
+    ...peopleEntries,
+  ];
+  form.reset();
+  form.classList.add("hidden");
+  renderPeopleDirectory();
+}
+
+function renderPeopleDirectory() {
+  const content = document.querySelector("#peopleDirectoryContent");
+  if (!content) {
+    return;
+  }
+
+  document.querySelectorAll(".people-directory-tab").forEach((tab) => {
+    const isActive = tab.dataset.peopleTab === currentPeopleDirectoryTab;
+    tab.classList.toggle("bg-blue-600", isActive);
+    tab.classList.toggle("text-white", isActive);
+    tab.classList.toggle("shadow-sm", isActive);
+    tab.classList.toggle("text-slate-600", !isActive);
+  });
+
+  if (currentPeopleDirectoryTab === "map") {
+    content.innerHTML = `
+      <div>
+        <div>
+          <p class="text-sm font-black uppercase text-blue-700">Rastreador</p>
+          <h2 class="mt-1 text-3xl font-black text-[#071836]">Mapa de personas en Costa Rica</h2>
+          <p class="mt-2 text-sm text-slate-500">Puntos por persona segun la zona registrada.</p>
         </div>
-      </section>
+        <div class="mt-6 overflow-hidden rounded-lg border border-slate-200 bg-slate-50">
+          <div id="peopleMap"></div>
+        </div>
+      </div>
+    `;
+    requestAnimationFrame(setupPeopleMap);
+    return;
+  }
+
+  if (currentPeopleDirectoryTab === "critical") {
+    content.innerHTML = `
+      <div>
+        <div>
+          <p class="text-sm font-black uppercase text-red-600">Personas registradas</p>
+          <h2 class="mt-1 text-3xl font-black text-[#071836]">Salud critica o problemas de salud</h2>
+        </div>
+        <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          ${criticalPeopleEntries.map(renderCriticalPersonCard).join("")}
+        </div>
+      </div>
+    `;
+    return;
+  }
+
+  content.innerHTML = `
+    <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+      <div>
+        <p class="text-sm font-black uppercase text-blue-700">Personal</p>
+        <h2 class="mt-1 text-3xl font-black text-[#071836]">Personal registrado</h2>
+      </div>
+      <button id="togglePeopleFormBtn" class="inline-flex min-h-11 items-center justify-center gap-2 rounded-md bg-blue-600 px-5 text-sm font-black text-white shadow-lg shadow-blue-600/20 transition hover:bg-blue-700 active:scale-[.98]" type="button">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14"/><path d="M5 12h14"/></svg>
+        Agregar persona
+      </button>
+    </div>
+
+    <form id="peopleForm" class="mt-6 hidden grid gap-4 md:grid-cols-2 xl:grid-cols-5">
+      ${renderPeopleInput("personNameInput", "Nombre", "Nombre completo")}
+      ${renderPeopleInput("personRoleInput", "Cargo", "Paramedico")}
+      ${renderPeopleInput("personZoneInput", "Zona", "Base Norte")}
+      ${renderPeopleInput("personPhoneInput", "Telefono", "8888-0000", "tel")}
+      <button class="self-end rounded-md bg-red-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
+        Guardar persona
+      </button>
+    </form>
+
+    <div class="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+      ${peopleEntries
+    .map((person, index) => `
+      <button class="rounded-lg border border-slate-200 bg-white p-5 text-left shadow-lg shadow-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-xl" data-staff-person-index="${index}" type="button">
+        <div class="flex items-start justify-between gap-4">
+          <div>
+            <p class="text-xs font-black uppercase text-blue-700">${person.role}</p>
+            <h3 class="mt-2 text-xl font-black text-[#071836]">${person.name}</h3>
+            <p class="mt-2 text-sm font-bold text-slate-600">${person.zone}</p>
+          </div>
+          <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-black uppercase text-emerald-700">${person.status}</span>
+        </div>
+        <a class="mt-5 inline-flex min-h-10 items-center justify-center rounded-md border border-slate-200 px-4 text-sm font-black text-[#071836] transition hover:bg-slate-50" href="tel:${person.phone.replace(/[^\d+]/g, "")}">
+          ${person.phone}
+        </a>
+      </button>
+    `)
+    .join("")}
     </div>
   `;
 }
 
-function renderQuickCard(sectionId, title, subtitle, tone) {
-  const tones = {
-    blue: "bg-blue-600",
-    red: "bg-red-600",
-    green: "bg-emerald-600",
-    purple: "bg-violet-600",
-  };
+function getPeopleMapEntries() {
+  return [
+    ...peopleEntries.map((person) => ({
+      name: person.name,
+      label: person.role,
+      phone: person.phone,
+      latitude: person.latitude,
+      longitude: person.longitude,
+      tone: "#2563eb",
+    })),
+    ...criticalPeopleEntries.map((person) => ({
+      name: person.fullName,
+      label: "Salud critica",
+      phone: person.phone,
+      latitude: person.latitude,
+      longitude: person.longitude,
+      tone: "#dc2626",
+    })),
+  ].filter((person) => Number.isFinite(person.latitude) && Number.isFinite(person.longitude));
+}
 
+function setupPeopleMap() {
+  const mapElement = document.querySelector("#peopleMap");
+  if (!mapElement) {
+    return;
+  }
+
+  const entries = getPeopleMapEntries();
+  mapElement.className = "sea-static-map rounded-lg";
+  mapElement.innerHTML = `
+    <svg class="sea-static-map-outline" viewBox="0 0 900 560" fill="none" aria-hidden="true">
+      <path d="M68 252C138 214 191 177 267 181C334 184 382 220 433 247C497 281 561 276 622 304C678 330 716 381 806 397C823 400 830 423 814 434C759 472 686 462 618 437C553 413 505 383 445 378C380 373 334 404 272 384C215 366 192 319 136 307C91 297 43 289 68 252Z" fill="#dbeafe" stroke="#0b2a5b" stroke-width="8" stroke-linejoin="round"/>
+      <path d="M126 278C189 239 242 226 304 242C378 261 427 321 504 318C571 316 629 345 694 386" stroke="#2563eb" stroke-width="5" stroke-linecap="round" stroke-dasharray="12 14" opacity=".45"/>
+      <circle cx="262" cy="248" r="7" fill="#0b2a5b" opacity=".3"/>
+      <circle cx="510" cy="318" r="7" fill="#0b2a5b" opacity=".3"/>
+      <circle cx="694" cy="386" r="7" fill="#0b2a5b" opacity=".3"/>
+    </svg>
+    ${entries.map(renderStaticMapPoint).join("")}
+    <div class="absolute bottom-4 left-4 grid gap-2 rounded-lg border border-white/80 bg-white/90 p-4 text-sm font-bold text-[#071836] shadow-lg">
+      <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-blue-600"></span>Personal</span>
+      <span class="inline-flex items-center gap-2"><span class="h-3 w-3 rounded-full bg-red-600"></span>Salud critica</span>
+    </div>
+  `;
+}
+
+function renderStaticMapPoint(person) {
+  const position = getStaticMapPosition(person.latitude, person.longitude);
   return `
-    <button class="quick-card flex min-h-20 items-center justify-between rounded-lg border border-slate-200 bg-white p-5 text-left shadow-lg shadow-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-xl" data-section="${sectionId}" type="button">
-      <span class="flex items-center gap-4">
-        <span class="grid h-11 w-11 place-items-center rounded-lg ${tones[tone]} text-white">
-          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 5v14"/><path d="M5 12h14"/>
-          </svg>
-        </span>
-        <span>
-          <strong class="block text-sm text-[#071836]">${title}</strong>
-          <span class="mt-1 block text-sm text-slate-500">${subtitle}</span>
-        </span>
-      </span>
-      <span class="grid h-8 w-8 place-items-center rounded-md text-[#071836]">
-        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <path d="M5 12h14"></path>
-          <path d="m12 5 7 7-7 7"></path>
-        </svg>
+    <button
+      class="sea-static-map-point group h-5 w-5 rounded-full"
+      style="left:${position.x}%; top:${position.y}%; background:${person.tone};"
+      type="button"
+      aria-label="${person.name}"
+    >
+      <span class="pointer-events-none absolute bottom-7 left-1/2 hidden min-w-48 -translate-x-1/2 rounded-md bg-white px-3 py-2 text-left text-xs font-bold text-[#071836] shadow-xl group-hover:block">
+        <strong class="block text-sm">${person.name}</strong>
+        <span class="mt-1 block text-slate-600">${person.label}</span>
+        <span class="mt-1 block text-slate-600">${person.phone}</span>
       </span>
     </button>
   `;
+}
+
+function getStaticMapPosition(latitude, longitude) {
+  const minLatitude = 8.03;
+  const maxLatitude = 11.22;
+  const minLongitude = -85.95;
+  const maxLongitude = -82.45;
+  const x = ((longitude - minLongitude) / (maxLongitude - minLongitude)) * 78 + 11;
+  const y = (1 - ((latitude - minLatitude) / (maxLatitude - minLatitude))) * 68 + 14;
+  return {
+    x: Math.max(8, Math.min(92, x)),
+    y: Math.max(10, Math.min(90, y)),
+  };
+}
+
+function renderCriticalPersonCard(person, index) {
+  return `
+    <button class="rounded-lg border border-slate-200 bg-white p-5 text-left shadow-lg shadow-slate-200/60 transition hover:-translate-y-0.5 hover:shadow-xl" data-critical-person-index="${index}" type="button">
+      <p class="text-xs font-black uppercase text-red-600">Registro de salud</p>
+      <h3 class="mt-2 text-xl font-black text-[#071836]">${person.fullName}</h3>
+      <div class="mt-5 grid gap-3 text-sm">
+        <p class="rounded-md bg-slate-50 px-4 py-3">
+          <span class="block text-xs font-black uppercase text-blue-700">Cedula</span>
+          <span class="mt-1 block font-bold text-[#071836]">${person.idNumber}</span>
+        </p>
+        <p class="rounded-md bg-slate-50 px-4 py-3">
+          <span class="block text-xs font-black uppercase text-blue-700">Telefono</span>
+          <span class="mt-1 block font-bold text-[#071836]">${person.phone}</span>
+        </p>
+      </div>
+    </button>
+  `;
+}
+
+function openStaffPersonModal(index) {
+  const person = peopleEntries[index];
+  if (!person) {
+    return;
+  }
+
+  const modal = document.createElement("div");
+  modal.id = "staffPersonModal";
+  modal.className = "fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 p-4";
+  modal.innerHTML = `
+    <section class="w-[min(620px,100%)] rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-sm font-black uppercase text-blue-700">Detalle de personal</p>
+          <h2 class="mt-1 text-3xl font-black text-[#071836]">${person.name}</h2>
+          <p class="mt-2 text-sm font-bold text-slate-600">${person.phone} · ${person.zone}</p>
+        </div>
+        <button class="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 text-[#071836] transition hover:bg-slate-50" data-close-staff-modal type="button" aria-label="Cerrar">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="mt-6 grid gap-3 text-sm md:grid-cols-2">
+        ${renderCriticalDetail("Enfermedad", person.condition)}
+        ${renderCriticalDetail("Puesto", person.role)}
+        ${renderCriticalDetail("Contacto de emergencia", person.emergencyContact)}
+        ${renderCriticalDetail("Turno", person.shift)}
+        ${renderCriticalDetail("Empresa", person.company)}
+      </div>
+    </section>
+  `;
+  document.body.append(modal);
+}
+
+function closeStaffPersonModal() {
+  document.querySelector("#staffPersonModal")?.remove();
+}
+
+function openCriticalPersonModal(index) {
+  const person = criticalPeopleEntries[index];
+  if (!person) {
+    return;
+  }
+
+  const modal = document.createElement("div");
+  modal.id = "criticalPersonModal";
+  modal.className = "fixed inset-0 z-[80] flex items-center justify-center bg-slate-950/60 p-4";
+  modal.innerHTML = `
+    <section class="w-[min(620px,100%)] rounded-lg border border-slate-200 bg-white p-6 shadow-2xl">
+      <div class="flex items-start justify-between gap-4">
+        <div>
+          <p class="text-sm font-black uppercase text-red-600">Detalle de salud</p>
+          <h2 class="mt-1 text-3xl font-black text-[#071836]">${person.fullName}</h2>
+          <p class="mt-2 text-sm font-bold text-slate-600">Cedula ${person.idNumber} · ${person.phone}</p>
+        </div>
+        <button class="grid h-10 w-10 shrink-0 place-items-center rounded-md border border-slate-200 text-[#071836] transition hover:bg-slate-50" data-close-critical-modal type="button" aria-label="Cerrar">
+          <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>
+        </button>
+      </div>
+      <div class="mt-6 grid gap-3 text-sm md:grid-cols-2">
+        ${renderCriticalDetail("Residencia", person.residence)}
+        ${renderCriticalDetail("Contacto de emergencia", person.emergencyContact)}
+        ${renderCriticalDetail("Enfermedad", person.condition)}
+        ${renderCriticalDetail("Seguro", person.insurance)}
+        ${renderCriticalDetail("Hospital de preferencia", person.preferredHospital)}
+      </div>
+    </section>
+  `;
+  document.body.append(modal);
+}
+
+function closeCriticalPersonModal() {
+  document.querySelector("#criticalPersonModal")?.remove();
+}
+
+function renderCriticalDetail(label, value) {
+  return `
+    <p class="rounded-md bg-slate-50 px-4 py-3">
+      <span class="block text-xs font-black uppercase text-blue-700">${label}</span>
+      <span class="mt-1 block font-bold text-[#071836]">${value}</span>
+    </p>
+  `;
+}
+
+const fallbackAmbulances = [
+  {
+    id: 1,
+    name: "Unidad S.E.A-01",
+    model: "Toyota Hiace",
+    zone: "Base Norte",
+    province: "San Jose",
+    staff_count: 3,
+    preferred_hospital: "Hospital Mexico",
+    company: "S.E.A",
+    driver: "Ana Perez",
+    location: "Base Norte",
+    priority: "medium",
+    active: false,
+  },
+  {
+    id: 2,
+    name: "Unidad S.E.A-02",
+    model: "Mercedes-Benz Sprinter",
+    zone: "Base Sur",
+    province: "San Jose",
+    staff_count: 2,
+    preferred_hospital: "Hospital San Juan de Dios",
+    company: "S.E.A",
+    driver: "Luis Rojas",
+    location: "Base Sur",
+    priority: "low",
+    active: false,
+  },
+];
+let localAmbulances = [...fallbackAmbulances];
+let usingLocalAmbulances = false;
+let remoteAmbulances = [...fallbackAmbulances];
+
+async function setupAmbulancePage() {
+  const list = document.querySelector("#ambulanceFleetList");
+
+  if (!list) {
+    return;
+  }
+
+  try {
+    const ambulances = await getAmbulances();
+    usingLocalAmbulances = false;
+    remoteAmbulances = ambulances;
+    renderAmbulanceFleet(ambulances);
+  } catch (error) {
+    usingLocalAmbulances = true;
+    renderAmbulanceFleet(localAmbulances);
+  }
+}
+
+async function handleAmbulanceFormSubmit(event) {
+  event.preventDefault();
+  const form = event.currentTarget;
+  const list = usingLocalAmbulances ? localAmbulances : remoteAmbulances;
+  const ambulance = {
+    id: Math.max(0, ...list.map((item) => Number(item.id) || 0)) + 1,
+    name: document.querySelector("#ambulanceNameInput").value.trim(),
+    model: document.querySelector("#ambulanceModelInput").value.trim(),
+    zone: document.querySelector("#ambulanceZoneInput").value.trim(),
+    province: document.querySelector("#ambulanceProvinceInput").value.trim(),
+    staff_count: Number(document.querySelector("#ambulanceStaffInput").value),
+    preferred_hospital: document.querySelector("#ambulanceHospitalInput").value.trim(),
+    company: document.querySelector("#ambulanceCompanyInput").value.trim(),
+    driver: "Sin asignar",
+    location: document.querySelector("#ambulanceZoneInput").value.trim(),
+    priority: "low",
+    active: false,
+  };
+
+  localAmbulances = [ambulance, ...localAmbulances];
+  remoteAmbulances = [ambulance, ...remoteAmbulances];
+  renderAmbulanceFleet(usingLocalAmbulances ? localAmbulances : remoteAmbulances);
+  form.reset();
+  form.classList.add("hidden");
+
+  try {
+    const { id, ...payload } = ambulance;
+    await createAmbulance(payload);
+    const ambulances = await getAmbulances();
+    remoteAmbulances = ambulances;
+    usingLocalAmbulances = false;
+    renderAmbulanceFleet(ambulances);
+  } catch (error) {
+    usingLocalAmbulances = true;
+    renderAmbulanceFleet(localAmbulances);
+  }
+}
+
+function renderAmbulanceFleet(ambulances) {
+  const list = document.querySelector("#ambulanceFleetList");
+  const availableCount = document.querySelector("#ambulanceAvailableCount");
+  const activeCount = document.querySelector("#ambulanceActiveCount");
+
+  const activeAmbulances = ambulances.filter((ambulance) => ambulance.active);
+  const availableAmbulances = ambulances.filter((ambulance) => !ambulance.active);
+
+  if (availableCount) availableCount.textContent = String(availableAmbulances.length);
+  if (activeCount) activeCount.textContent = String(activeAmbulances.length);
+
+  if (!list) {
+    return;
+  }
+
+  list.innerHTML = ambulances
+    .map((ambulance) => {
+      const isActive = Boolean(ambulance.active);
+      const statusLabel = isActive ? "En servicio" : "Disponible";
+      const statusClass = isActive ? "bg-red-50 text-red-700" : "bg-emerald-50 text-emerald-700";
+
+      return `
+        <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/60">
+          <div class="flex items-start justify-between gap-4">
+            <div>
+              <p class="text-xs font-black uppercase text-blue-700">${ambulance.company}</p>
+              <h3 class="mt-2 text-xl font-black text-[#071836]">${ambulance.name}</h3>
+              <p class="mt-2 text-sm font-bold text-slate-600">${ambulance.model}</p>
+            </div>
+            <span class="rounded-full px-3 py-1 text-xs font-black uppercase ${statusClass}">${statusLabel}</span>
+          </div>
+          <div class="mt-5 grid gap-3 text-sm text-slate-600 md:grid-cols-2">
+            ${renderAmbulanceDetail("Zona", ambulance.zone)}
+            ${renderAmbulanceDetail("Provincia", ambulance.province)}
+            ${renderAmbulanceDetail("Personal", `${ambulance.staff_count} personas`)}
+            ${renderAmbulanceDetail("Hospital", ambulance.preferred_hospital)}
+            ${renderAmbulanceDetail("Compania", ambulance.company)}
+            ${renderAmbulanceDetail("Prioridad", priorityLabel(ambulance.priority))}
+          </div>
+        </article>
+      `;
+    })
+    .join("");
+}
+
+function renderAmbulanceDetail(label, value) {
+  return `
+    <p class="rounded-md bg-slate-50 px-4 py-3">
+      <span class="block text-xs font-black uppercase text-blue-700">${label}</span>
+      <span class="mt-1 block font-bold text-[#071836]">${value}</span>
+    </p>
+  `;
+}
+
+function priorityLabel(priority) {
+  const labels = {
+    high: "Alta",
+    medium: "Media",
+    low: "Baja",
+    none: "Sin prioridad",
+  };
+
+  return labels[priority] ?? priority;
 }
 
 function renderSettingsStat(title, subtitle, icon, tone = "red") {
@@ -833,7 +1704,7 @@ function getBasicHealthAiAnswer(message, agent = "salud") {
   }
 
   if (/(ruta|ambulancia|traslado|mapa|llegar|trafico|origen|destino)/.test(text)) {
-    return "Para rutas de ambulancia en Costa Rica, usa Tracking en mapa. Escribe un origen y destino especificos, por ejemplo Hospital Mexico u Hospital Calderon Guardia, y verifica la ruta con las condiciones reales de transito.";
+    return "Para revisar ambulancias de S.E.A, abre la pagina Ambulancias. Ahi puedes ver unidades, conductores, ubicacion, prioridad y disponibilidad operativa.";
   }
 
   if (/(protocolo|ministerio|salud publica|triaje|prioridad|paciente)/.test(text)) {
@@ -873,312 +1744,11 @@ function escapeHtml(value) {
   })[character]);
 }
 
-function renderSectionItem(item) {
-  if (typeof item === "string") {
-    return `<p class="text-slate-700">${item}</p>`;
-  }
-
-  const itemRoutes = {
-    alerts: {
-      sourcePath: "../frontend-alerts/index.html",
-      buildPath: "../alerts/",
-    },
-    "routes-config": {
-      sourcePath: "../frontend-routes-config/index.html",
-      buildPath: "../routes-config/",
-    },
-    "maps-config": {
-      sourcePath: "../frontend-maps-config/index.html",
-      buildPath: "../maps-config/",
-    },
-  };
-  const route = itemRoutes[item.href];
-  const href = route
-    ? (isSourceMenu() ? route.sourcePath : route.buildPath)
-    : "#";
-
-  return `
-    <a
-      class="font-bold text-red-700 transition hover:text-red-900"
-      href="${href}"
-    >
-      ${item.label}
-    </a>
-  `;
-}
-
-function setupTrackingMap() {
-  const mapElement = document.querySelector("#trackingMap");
-  const form = document.querySelector("#routeSearchForm");
-  const status = document.querySelector("#routeSearchStatus");
-  const startInput = document.querySelector("#routeStartInput");
-  const endInput = document.querySelector("#routeEndInput");
-  const startOptions = document.querySelector("#routeStartOptions");
-  const endOptions = document.querySelector("#routeEndOptions");
-
-  if (!mapElement || mapElement.clientWidth === 0) {
-    setTimeout(setupTrackingMap, 80);
-    return;
-  }
-
-  if (trackingMap) {
-    trackingMap.off();
-    trackingMap.remove();
-    trackingMap = null;
-  }
-
-  trackingMap = L.map(mapElement, {
-    attributionControl: false,
-    maxBounds: costaRicaBounds,
-    maxBoundsViscosity: 0.75,
-    preferCanvas: true,
-    scrollWheelZoom: true,
-    zoomControl: true,
-  });
-
-  L.tileLayer("https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png", {
-    maxZoom: 19,
-    minZoom: 7,
-    subdomains: "abcd",
-    attribution: "&copy; OpenStreetMap contributors &copy; CARTO",
-    crossOrigin: true,
-  }).addTo(trackingMap);
-
-  trackingMap.fitBounds(costaRicaBounds, { padding: [22, 22] });
-
-  form.addEventListener("submit", async (event) => {
-    event.preventDefault();
-    status.textContent = "Buscando ubicaciones y calculando ruta...";
-
-    try {
-      const startQuery = startInput.value;
-      const endQuery = endInput.value;
-      const start = startSelectedPlace?.label === startQuery
-        ? startSelectedPlace
-        : await geocodeCostaRica(startQuery);
-      const end = endSelectedPlace?.label === endQuery
-        ? endSelectedPlace
-        : await geocodeCostaRica(endQuery);
-      const route = await getOsrmRoute(start, end);
-      renderTrackingRoute(start, end, route);
-      status.textContent = `Ruta calculada: ${(route.distance / 1000).toFixed(1)} km, ${(route.duration / 60).toFixed(0)} min aprox.`;
-    } catch (error) {
-      status.textContent = "No se pudo calcular la ruta. Prueba con nombres mas especificos.";
-    }
-  });
-
-  setupPlaceAutocomplete(startInput, startOptions, (place) => {
-    startSelectedPlace = place;
-  });
-  setupPlaceAutocomplete(endInput, endOptions, (place) => {
-    endSelectedPlace = place;
-  });
-
-  mapElement.__leafletReady = true;
-  fitCostaRicaMap();
-  setTimeout(fitCostaRicaMap, 120);
-  setTimeout(fitCostaRicaMap, 350);
-  setTimeout(fitCostaRicaMap, 800);
-}
-
-function fitCostaRicaMap() {
-  if (!trackingMap) {
-    return;
-  }
-
-  trackingMap.invalidateSize(true);
-  trackingMap.fitBounds(costaRicaBounds, { padding: [22, 22] });
-}
-
-function setupPlaceAutocomplete(input, optionsContainer, onSelect) {
-  let timeoutId;
-
-  input.addEventListener("input", () => {
-    onSelect(null);
-    clearTimeout(timeoutId);
-
-    const query = input.value.trim();
-    if (query.length < 3) {
-      hideOptions(optionsContainer);
-      return;
-    }
-
-    timeoutId = setTimeout(async () => {
-      try {
-        const places = await searchCostaRicaPlaces(query);
-        renderPlaceOptions(optionsContainer, places, (place) => {
-          input.value = place.label;
-          onSelect(place);
-          hideOptions(optionsContainer);
-        });
-      } catch (error) {
-        hideOptions(optionsContainer);
-      }
-    }, 350);
-  });
-
-  input.addEventListener("blur", () => {
-    setTimeout(() => hideOptions(optionsContainer), 160);
-  });
-}
-
-function renderPlaceOptions(container, places, onSelect) {
-  if (places.length === 0) {
-    container.innerHTML = `<p class="px-3 py-3 text-sm text-slate-500">Sin resultados en Costa Rica.</p>`;
-    container.classList.remove("hidden");
-    return;
-  }
-
-  container.innerHTML = places
-    .map(
-      (place, index) => `
-        <button
-          class="block w-full border-b border-slate-100 px-3 py-3 text-left text-sm text-slate-700 transition last:border-b-0 hover:bg-blue-50"
-          data-place-index="${index}"
-          type="button"
-        >
-          <span class="block font-bold text-[#071836]">${place.shortName}</span>
-          <span class="mt-1 block text-xs text-slate-500">${place.label}</span>
-        </button>
-      `,
-    )
-    .join("");
-
-  container.querySelectorAll("[data-place-index]").forEach((button) => {
-    button.addEventListener("mousedown", (event) => {
-      event.preventDefault();
-      onSelect(places[Number(button.dataset.placeIndex)]);
-    });
-  });
-
-  container.classList.remove("hidden");
-}
-
-function hideOptions(container) {
-  container.classList.add("hidden");
-  container.innerHTML = "";
-}
-
-async function searchCostaRicaPlaces(query) {
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("format", "jsonv2");
-  url.searchParams.set("limit", "6");
-  url.searchParams.set("countrycodes", "cr");
-  url.searchParams.set("addressdetails", "1");
-  url.searchParams.set("q", `${query}, Costa Rica`);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Place search failed");
-  }
-
-  const results = await response.json();
-  return results.map((result) => ({
-    label: result.display_name,
-    shortName: result.name || result.display_name.split(",")[0],
-    latitude: Number(result.lat),
-    longitude: Number(result.lon),
-  }));
-}
-
-async function geocodeCostaRica(query) {
-  const url = new URL("https://nominatim.openstreetmap.org/search");
-  url.searchParams.set("format", "jsonv2");
-  url.searchParams.set("limit", "1");
-  url.searchParams.set("countrycodes", "cr");
-  url.searchParams.set("q", `${query}, Costa Rica`);
-
-  const response = await fetch(url);
-  if (!response.ok) {
-    throw new Error("Geocoding failed");
-  }
-
-  const results = await response.json();
-  if (!results.length) {
-    throw new Error("Location not found");
-  }
-
-  return {
-    label: results[0].display_name,
-    name: results[0].display_name,
-    latitude: Number(results[0].lat),
-    longitude: Number(results[0].lon),
-  };
-}
-
-async function getOsrmRoute(start, end) {
-  const coordinates = `${start.longitude},${start.latitude};${end.longitude},${end.latitude}`;
-  const url = `https://router.project-osrm.org/route/v1/driving/${coordinates}?overview=full&geometries=geojson`;
-  const response = await fetch(url);
-
-  if (!response.ok) {
-    throw new Error("Route failed");
-  }
-
-  const data = await response.json();
-  if (!data.routes?.[0]) {
-    throw new Error("Route not found");
-  }
-
-  return data.routes[0];
-}
-
-function renderTrackingRoute(start, end, route) {
-  if (trackingRouteLayer) {
-    trackingRouteLayer.remove();
-  }
-
-  if (trackingMarkerLayer) {
-    trackingMarkerLayer.remove();
-  }
-
-  const points = route.geometry.coordinates.map(([longitude, latitude]) => [
-    latitude,
-    longitude,
-  ]);
-
-  trackingRouteLayer = L.polyline(points, {
-    color: "#3b82f6",
-    opacity: 0.92,
-    weight: 6,
-  }).addTo(trackingMap);
-
-  trackingMarkerLayer = L.layerGroup([
-    L.marker([start.latitude, start.longitude], {
-      icon: createMapMarkerIcon("#2563eb"),
-    }).bindPopup(`Origen: ${start.label ?? start.name}`),
-    L.marker([end.latitude, end.longitude], {
-      icon: createMapMarkerIcon("#dc2626"),
-    }).bindPopup(`Destino: ${end.label ?? end.name}`),
-  ]).addTo(trackingMap);
-
-  trackingMap.fitBounds(trackingRouteLayer.getBounds(), { padding: [28, 28] });
-}
-
-function createMapMarkerIcon(color) {
-  return L.divIcon({
-    className: "sea-map-marker",
-    html: `
-      <svg width="34" height="42" viewBox="0 0 34 42" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
-        <path d="M17 41C17 41 31 26.6 31 15.8C31 7.6 24.7 1 17 1C9.3 1 3 7.6 3 15.8C3 26.6 17 41 17 41Z" fill="${color}" stroke="white" stroke-width="3"/>
-        <circle cx="17" cy="16" r="5.5" fill="white"/>
-      </svg>
-    `,
-    iconAnchor: [17, 41],
-    iconSize: [34, 42],
-    popupAnchor: [0, -38],
-  });
-}
-
-function isSourceMenu() {
-  return window.location.pathname.includes("frontend-menu");
-}
-
-function enterSystem(sectionId = "tracking") {
+function enterSystem(sectionId = "inicio") {
   closeCreateAccountModal();
   signupScreen.classList.add("hidden");
   topNav.classList.remove("hidden");
-  menuHero.classList.remove("hidden");
+  menuHero.classList.add("hidden");
   menuTabs.classList.remove("hidden");
   menuTabs.classList.add("grid");
   systemContent.classList.remove("hidden");
@@ -1221,7 +1791,7 @@ function returnToLogin() {
 setupTabs();
 applyPreferences();
 if (localStorage.getItem("seaSessionActive") === "true") {
-  enterSystem(localStorage.getItem("seaSection") || "tracking");
+  enterSystem(localStorage.getItem("seaSection") || "inicio");
 }
 signupForm.addEventListener("submit", (event) => {
   event.preventDefault();
@@ -1283,13 +1853,74 @@ document.addEventListener("pointerdown", (event) => {
   event.preventDefault();
   window.setSeaTheme(themeButton.dataset.themeOption);
 }, true);
+document.addEventListener("click", (event) => {
+  const toggleButton = event.target.closest?.("#toggleAmbulanceFormBtn");
+  if (!toggleButton) {
+    return;
+  }
+
+  document.querySelector("#ambulanceForm")?.classList.toggle("hidden");
+});
+document.addEventListener("click", (event) => {
+  const toggleButton = event.target.closest?.("#togglePeopleFormBtn");
+  if (!toggleButton) {
+    return;
+  }
+
+  document.querySelector("#peopleForm")?.classList.toggle("hidden");
+});
+document.addEventListener("click", (event) => {
+  const tab = event.target.closest?.("[data-people-tab]");
+  if (!tab) {
+    return;
+  }
+
+  currentPeopleDirectoryTab = tab.dataset.peopleTab === "critical" ? "critical" : "staff";
+  renderPeopleDirectory();
+});
+document.addEventListener("click", (event) => {
+  const card = event.target.closest?.("[data-critical-person-index]");
+  if (!card) {
+    return;
+  }
+
+  openCriticalPersonModal(Number(card.dataset.criticalPersonIndex));
+});
+document.addEventListener("click", (event) => {
+  const card = event.target.closest?.("[data-staff-person-index]");
+  if (!card) {
+    return;
+  }
+
+  openStaffPersonModal(Number(card.dataset.staffPersonIndex));
+});
+document.addEventListener("click", (event) => {
+  if (event.target.closest?.("[data-close-critical-modal]") || event.target?.id === "criticalPersonModal") {
+    closeCriticalPersonModal();
+  }
+  if (event.target.closest?.("[data-close-staff-modal]") || event.target?.id === "staffPersonModal") {
+    closeStaffPersonModal();
+  }
+});
+document.addEventListener("submit", (event) => {
+  if (event.target?.id !== "ambulanceForm") {
+    return;
+  }
+
+  handleAmbulanceFormSubmit(event);
+});
+document.addEventListener("submit", (event) => {
+  if (event.target?.id !== "peopleForm") {
+    return;
+  }
+
+  handlePeopleFormSubmit(event);
+});
 homeLogoBtn.addEventListener("click", () => {
-  renderSection("tracking");
-  setTimeout(fitCostaRicaMap, 120);
+  renderSection("inicio");
 });
 if (ambulanceIconBtn) ambulanceIconBtn.addEventListener("click", () => {
   renderSection("tracking");
-  setTimeout(fitCostaRicaMap, 120);
 });
 if (settingsIconBtn) settingsIconBtn.addEventListener("click", () => {
   renderSection("configuraciones");
@@ -1309,5 +1940,9 @@ toggleModalPassword.addEventListener("click", () => {
 document.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !signupModal.classList.contains("hidden")) {
     closeCreateAccountModal();
+  }
+  if (event.key === "Escape") {
+    closeCriticalPersonModal();
+    closeStaffPersonModal();
   }
 });

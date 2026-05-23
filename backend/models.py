@@ -22,10 +22,31 @@ class EmergencyLocation(BaseModel):
 
 class Ambulance(BaseModel):
     id: int
+    name: str
+    model: str
+    zone: str
+    province: str
+    staff_count: int
+    preferred_hospital: str
+    company: str
     driver: str
     location: str
     priority: str
     active: bool = True
+
+
+class AmbulanceCreateRequest(BaseModel):
+    name: str
+    model: str
+    zone: str
+    province: str
+    staff_count: int
+    preferred_hospital: str
+    company: str
+    driver: str = "Sin asignar"
+    location: str = "Base operativa"
+    priority: str = "low"
+    active: bool = False
 
 
 class DispatchRequest(BaseModel):

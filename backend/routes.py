@@ -1,7 +1,8 @@
 from fastapi import APIRouter
 
-from models import ChatRequest, DispatchRequest
+from models import AmbulanceCreateRequest, ChatRequest, DispatchRequest
 from services import (
+    add_ambulance,
     ask_open_source_health_ai,
     get_ambulances,
     get_emergency_location,
@@ -22,6 +23,11 @@ def traffic_lights():
 @router.get("/ambulances")
 def ambulances():
     return get_ambulances()
+
+
+@router.post("/ambulances")
+def create_ambulance(request: AmbulanceCreateRequest):
+    return add_ambulance(request)
 
 
 @router.get("/hospitals")

@@ -48,8 +48,25 @@
 
       body {
         background:
-          radial-gradient(circle at 18% 8%, rgba(38, 99, 235, 0.08), transparent 28rem),
-          linear-gradient(180deg, #ffffff 0%, #f6f8fb 52%, #ffffff 100%);
+          radial-gradient(circle at 14% 8%, rgba(34, 211, 238, 0.16), transparent 26rem),
+          radial-gradient(circle at 88% 6%, rgba(226, 29, 45, 0.18), transparent 28rem),
+          radial-gradient(circle at 52% 100%, rgba(37, 99, 235, 0.16), transparent 30rem),
+          linear-gradient(135deg, #050b18 0%, #071836 44%, #101827 100%);
+        color: #e5edf8;
+        min-height: 100vh;
+      }
+
+      body::before {
+        background-image:
+          linear-gradient(rgba(148, 163, 184, 0.06) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(148, 163, 184, 0.06) 1px, transparent 1px);
+        background-size: 42px 42px;
+        content: "";
+        inset: 0;
+        mask-image: linear-gradient(180deg, rgba(0, 0, 0, 0.72), transparent 80%);
+        pointer-events: none;
+        position: fixed;
+        z-index: -1;
       }
 
       body.sea-dark {
@@ -117,22 +134,6 @@
         box-shadow: 0 20px 45px rgba(0, 0, 0, 0.32) !important;
       }
 
-      body.sea-dark #trackingMap,
-      body.sea-dark .map-card,
-      body.sea-dark .leaflet-container {
-        background-color: #0f172a !important;
-      }
-
-      body.sea-dark #trackingMap .leaflet-tile-pane {
-        filter: brightness(0.72) contrast(1.08) saturate(0.86);
-      }
-
-      body.sea-dark #trackingMap .leaflet-control-zoom a {
-        background: #0f172a;
-        border-color: #334155;
-        color: #e5e7eb;
-      }
-
       body.sea-dark .help-widget-panel {
         background-color: rgba(15, 23, 42, 0.86) !important;
         border-color: rgba(71, 85, 105, 0.72) !important;
@@ -171,164 +172,84 @@
         width: min(100%, 100vw);
       }
 
-      #trackingMap {
-        min-height: 500px;
-        height: clamp(420px, 52vw, 560px);
-        width: 100%;
+      #topNav {
+        background:
+          linear-gradient(135deg, rgba(255, 255, 255, 0.9), rgba(226, 232, 240, 0.78)) !important;
+        border-color: rgba(255, 255, 255, 0.58) !important;
+        box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2) !important;
       }
 
-      #trackingMap .leaflet-container,
-      .leaflet-container {
-        height: 100%;
-        overflow: hidden;
-        position: relative;
-        touch-action: pan-x pan-y;
-        width: 100%;
-        font: inherit;
+      #systemContent {
+        background:
+          linear-gradient(180deg, rgba(248, 250, 252, 0.9), rgba(226, 232, 240, 0.84));
+        border-top: 1px solid rgba(255, 255, 255, 0.58);
+        min-height: calc(100vh - 80px);
       }
 
-      #trackingMap .leaflet-pane,
-      #trackingMap .leaflet-map-pane,
-      #trackingMap .leaflet-tile-pane,
-      #trackingMap .leaflet-overlay-pane,
-      #trackingMap .leaflet-shadow-pane,
-      #trackingMap .leaflet-marker-pane,
-      #trackingMap .leaflet-tooltip-pane,
-      #trackingMap .leaflet-popup-pane {
-        position: absolute;
-        left: 0;
-        top: 0;
+      #contentPanel > * {
+        animation: seaPanelIn 360ms ease both;
       }
 
-      #trackingMap .leaflet-map-pane {
-        z-index: 400;
+      #contentPanel .bg-white,
+      #contentPanel .bg-slate-50,
+      #contentPanel .bg-blue-50,
+      #contentPanel .bg-red-50,
+      #contentPanel .bg-emerald-50 {
+        background-color: rgba(255, 255, 255, 0.88) !important;
+        backdrop-filter: blur(18px);
       }
 
-      #trackingMap .leaflet-tile-pane {
-        z-index: 200;
+      #contentPanel .border-slate-200,
+      #contentPanel .border-slate-100 {
+        border-color: rgba(148, 163, 184, 0.34) !important;
       }
 
-      #trackingMap .leaflet-overlay-pane {
-        z-index: 400;
+      #contentPanel .shadow-xl,
+      #contentPanel .shadow-lg,
+      #contentPanel .shadow-2xl {
+        box-shadow: 0 24px 70px rgba(7, 24, 54, 0.16) !important;
       }
 
-      #trackingMap .leaflet-shadow-pane {
-        z-index: 500;
+      #contentPanel input,
+      #contentPanel select {
+        background: rgba(255, 255, 255, 0.94) !important;
+        border-color: rgba(37, 99, 235, 0.18) !important;
       }
 
-      #trackingMap .leaflet-marker-pane {
-        z-index: 600;
-      }
-
-      #trackingMap .leaflet-tooltip-pane {
-        z-index: 650;
-      }
-
-      #trackingMap .leaflet-popup-pane {
-        z-index: 700;
-      }
-
-      #trackingMap .leaflet-tile-container {
-        left: 0;
-        position: absolute;
-        top: 0;
-      }
-
-      #trackingMap .leaflet-top,
-      #trackingMap .leaflet-bottom {
-        position: absolute;
-        z-index: 1000;
-        pointer-events: none;
-      }
-
-      #trackingMap .leaflet-top {
-        top: 0;
-      }
-
-      #trackingMap .leaflet-right {
-        right: 0;
-      }
-
-      #trackingMap .leaflet-bottom {
-        bottom: 0;
-      }
-
-      #trackingMap .leaflet-left {
-        left: 0;
-      }
-
-      #trackingMap .leaflet-control {
-        clear: both;
-        float: left;
-        pointer-events: auto;
+      .menu-tab {
         position: relative;
       }
 
-      #trackingMap .leaflet-tile,
-      #trackingMap .leaflet-marker-icon,
-      #trackingMap .leaflet-marker-shadow {
-        max-width: none !important;
-        max-height: none !important;
-      }
-
-      #trackingMap .leaflet-tile {
-        height: 256px !important;
+      .menu-tab::after {
+        background: linear-gradient(90deg, #2563eb, #22d3ee);
+        border-radius: 999px;
+        bottom: -2px;
+        content: "";
+        height: 3px;
         left: 0;
+        opacity: 0;
         position: absolute;
-        top: 0;
-        width: 256px !important;
+        transform: scaleX(0.4);
+        transition: 180ms ease;
+        width: 100%;
       }
 
-      #trackingMap .leaflet-marker-icon,
-      #trackingMap .leaflet-marker-shadow {
-        display: block;
-        position: absolute;
+      .menu-tab.text-blue-700::after,
+      .menu-tab:hover::after {
+        opacity: 1;
+        transform: scaleX(1);
       }
 
-      #trackingMap .leaflet-control-zoom {
-        border-radius: 8px;
-        margin-left: 12px;
-        margin-top: 12px;
-        overflow: hidden;
-      }
+      @keyframes seaPanelIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
 
-      #trackingMap .leaflet-control-zoom a {
-        background: #ffffff;
-        border-bottom: 1px solid #e2e8f0;
-        color: #071836;
-        display: block;
-        font-size: 22px;
-        font-weight: 700;
-        height: 34px;
-        line-height: 30px;
-        text-align: center;
-        text-decoration: none;
-        width: 34px;
-      }
-
-      #trackingMap .leaflet-control-zoom a:last-child {
-        border-bottom: 0;
-      }
-
-      #trackingMap .leaflet-control-attribution {
-        display: none;
-      }
-
-      #trackingMap .leaflet-control-attribution a {
-        color: #1d4ed8;
-        text-decoration: none;
-      }
-
-      #trackingMap .sea-map-marker {
-        align-items: center;
-        background: transparent;
-        border: 0;
-        display: flex;
-        justify-content: center;
-      }
-
-      #trackingMap .sea-map-marker svg {
-        filter: drop-shadow(0 8px 12px rgba(7, 24, 54, 0.22));
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       .sea-logo-mark {
@@ -368,14 +289,101 @@
         line-height: 1;
       }
 
-      .map-card .leaflet-control-zoom {
-        border: 0;
-        box-shadow: 0 14px 30px rgba(7, 24, 54, 0.14);
+      #homeTrackingMap {
+        min-height: 520px;
+        height: clamp(440px, 52vw, 620px);
+        width: 100%;
       }
 
-      .map-card .leaflet-control-zoom a {
+      #homeTrackingMap .leaflet-container,
+      #homeTrackingMap.leaflet-container {
+        height: 100%;
+        width: 100%;
+      }
+
+      #homeTrackingMap .leaflet-pane,
+      #homeTrackingMap .leaflet-map-pane,
+      #homeTrackingMap .leaflet-tile-pane,
+      #homeTrackingMap .leaflet-overlay-pane,
+      #homeTrackingMap .leaflet-shadow-pane,
+      #homeTrackingMap .leaflet-marker-pane,
+      #homeTrackingMap .leaflet-tooltip-pane,
+      #homeTrackingMap .leaflet-popup-pane {
+        position: absolute;
+        left: 0;
+        top: 0;
+      }
+
+      #homeTrackingMap .leaflet-tile-container {
+        left: 0;
+        position: absolute;
+        top: 0;
+      }
+
+      #homeTrackingMap .leaflet-tile-pane {
+        z-index: 200;
+      }
+
+      #homeTrackingMap .leaflet-overlay-pane,
+      #homeTrackingMap .sea-route-pane {
+        z-index: 650 !important;
+      }
+
+      #homeTrackingMap .leaflet-marker-pane,
+      #homeTrackingMap .sea-marker-pane {
+        z-index: 700 !important;
+      }
+
+      #homeTrackingMap .leaflet-tile,
+      #homeTrackingMap .leaflet-marker-icon,
+      #homeTrackingMap .leaflet-marker-shadow {
+        max-height: none !important;
+        max-width: none !important;
+      }
+
+      #homeTrackingMap .leaflet-tile {
+        height: 256px !important;
+        position: absolute;
+        width: 256px !important;
+      }
+
+      #homeTrackingMap .leaflet-control-attribution {
+        display: none;
+      }
+
+      #homeTrackingMap .sea-map-marker {
+        align-items: center;
+        background: transparent;
         border: 0;
-        color: var(--sea-ink);
+        display: flex;
+        justify-content: center;
+        z-index: 710 !important;
+      }
+
+      #peopleMap {
+        min-height: 520px;
+        height: clamp(440px, 52vw, 620px);
+        width: 100%;
+      }
+
+      .sea-static-map {
+        background:
+          linear-gradient(135deg, rgba(219, 234, 254, 0.94), rgba(240, 253, 250, 0.92)),
+          radial-gradient(circle at 20% 20%, rgba(37, 99, 235, 0.16), transparent 24rem);
+        overflow: hidden;
+        position: relative;
+      }
+
+      .sea-static-map-outline {
+        inset: 7% 8%;
+        position: absolute;
+      }
+
+      .sea-static-map-point {
+        border: 3px solid #ffffff;
+        box-shadow: 0 12px 24px rgba(7, 24, 54, 0.22);
+        position: absolute;
+        transform: translate(-50%, -50%);
       }
 
       .help-widget-panel {
@@ -447,7 +455,7 @@
                 </article>
                 <article class="rounded-lg border border-white/80 bg-white/80 p-4 shadow-sm backdrop-blur-xl">
                   <p class="text-xs font-bold uppercase text-red-600">Confiable</p>
-                  <p class="mt-1 text-sm font-bold text-[#071836]">Datos en tiempo real</p>
+                  <p class="mt-1 text-sm font-bold text-[#071836]">Datos operativos</p>
                 </article>
                 <article class="rounded-lg border border-white/80 bg-white/80 p-4 shadow-sm backdrop-blur-xl">
                   <p class="text-xs font-bold uppercase text-red-600">Soporte</p>
@@ -490,8 +498,9 @@
             </span>
           </button>
           <nav class="hidden items-center gap-10 text-sm font-bold text-[#071836] lg:flex">
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="tracking" type="button">Inicio</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="tracking" type="button">Tracking en mapa</button>
+            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="inicio" type="button">Inicio</button>
+            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="tracking" type="button">Ambulancias</button>
+            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="personas" type="button">Personas</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="directorio" type="button">Directorio</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="configuraciones" type="button">Ajustes</button>
           </nav>
@@ -519,7 +528,7 @@
         <div class="mx-auto w-[min(100%,calc(100%-48px))] py-10 md:py-12">
           <div class="relative rounded-lg border border-white/10 bg-white/5 px-6 py-8 text-white shadow-2xl shadow-blue-950/25 backdrop-blur-[2px] md:px-8">
             <h1 class="text-3xl font-black leading-tight md:text-5xl">S.E.A: Servicio de Emergencia en Ambulancia</h1>
-            <p class="mt-3 max-w-2xl text-base text-blue-50 md:text-lg">Sistema para monitorear ambulancias, rutas y mensajes de emergencia.</p>
+            <p class="mt-3 max-w-2xl text-base text-blue-50 md:text-lg">Sistema para coordinar ambulancias, personal y mensajes de emergencia.</p>
             <div class="mt-7 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
               <article class="flex items-center gap-4 rounded-lg border border-white/12 bg-white/8 p-3 backdrop-blur-md">
                 <span class="grid h-11 w-11 place-items-center rounded-lg bg-red-500/80">
@@ -527,17 +536,17 @@
                 </span>
                 <p class="text-sm"><strong class="block">Cobertura</strong>San Jose y Alajuela</p>
               </article>
-              <article class="flex items-center gap-4 rounded-lg border border-white/12 bg-white/8 p-3 backdrop-blur-md">
-                <span class="grid h-11 w-11 place-items-center rounded-lg bg-red-500/80">
-                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-                </span>
-                <p class="text-sm"><strong class="block">Confiable</strong>Datos en tiempo real</p>
+                <article class="flex items-center gap-4 rounded-lg border border-white/12 bg-white/8 p-3 backdrop-blur-md">
+                  <span class="grid h-11 w-11 place-items-center rounded-lg bg-red-500/80">
+                    <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+                  </span>
+                <p class="text-sm"><strong class="block">Confiable</strong>Datos operativos</p>
               </article>
               <article class="flex items-center gap-4 rounded-lg border border-white/12 bg-white/8 p-3 backdrop-blur-md">
                 <span class="grid h-11 w-11 place-items-center rounded-lg bg-red-500/80">
                   <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>
                 </span>
-                <p class="text-sm"><strong class="block">Actualizado</strong>Informacion 24/7</p>
+                <p class="text-sm"><strong class="block">Actualizado</strong>Panel 24/7</p>
               </article>
               <article class="flex items-center gap-4 rounded-lg border border-white/12 bg-white/8 p-3 backdrop-blur-md">
                 <span class="grid h-11 w-11 place-items-center rounded-lg bg-blue-600/80">

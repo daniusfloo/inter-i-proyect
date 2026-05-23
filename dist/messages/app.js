@@ -55,7 +55,7 @@ function renderEmergencyMessages(ambulances, emergency) {
   messageList.innerHTML = activeAmbulances
     .map((ambulance) => {
       const origin = baseLocations[ambulance.id] ?? "Base operativa";
-      const destination = emergency.status === "assigned" ? emergency.location : ambulance.location;
+      const destination = emergency.status === "assigned" ? emergency.location : (ambulance.location ?? ambulance.zone);
 
       return `
         <article class="rounded-lg border border-teal-100 bg-teal-50 p-5">
@@ -65,7 +65,7 @@ function renderEmergencyMessages(ambulances, emergency) {
                 Ambulancia en emergencia
               </p>
               <h2 class="mt-1 text-xl font-bold text-slate-900">
-                Ambulancia ${ambulance.id} - ${ambulance.driver}
+                Ambulancia ${ambulance.id} - ${ambulance.driver ?? ambulance.name}
               </h2>
             </div>
             <span class="inline-flex min-h-7 w-fit items-center rounded-full bg-white px-3 text-sm font-bold text-teal-800">

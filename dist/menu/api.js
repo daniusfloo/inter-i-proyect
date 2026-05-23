@@ -20,27 +20,43 @@ export function askHealthAi(message, agent) {
   });
 }
 
+export function getAmbulances() {
+  return request("/api/ambulances");
+}
+
+export function createAmbulance(ambulance) {
+  return request("/api/ambulances", {
+    method: "POST",
+    body: JSON.stringify(ambulance),
+  });
+}
+
 export function getMenuSections() {
   return {
+    inicio: {
+      title: "Inicio",
+      intro: "Mapa abierto para rastrear rutas y puntos de referencia en Costa Rica.",
+      type: "home",
+    },
     configuraciones: {
       title: "Ajustes",
       intro: "Opciones generales para preparar el uso del sistema.",
       type: "settings",
-      items: [],
     },
     tracking: {
-      title: "Tracking de ambulancias",
-      intro: "Mapa abierto con referencia de San Jose, hospitales y rutas principales.",
+      title: "Ambulancias S.E.A.",
+      intro: "Flota operativa del Servicio de Emergencia en Ambulancia.",
       type: "tracking",
-      items: [],
+    },
+    personas: {
+      title: "Personas",
+      intro: "Personal operativo registrado para apoyar ambulancias y emergencias.",
+      type: "people",
     },
     directorio: {
       title: "Directorio",
       intro: "Telefonos de hospitales, clinicas y contactos medicos de Costa Rica.",
       type: "directory",
-      items: [
-        "Fuente base: directorio publico de hospitales CCSS y directorios institucionales del Ministerio de Salud.",
-      ],
     },
   };
 }

@@ -66,10 +66,10 @@ function renderAmbulanceCards(ambulances, emptyMessage) {
         <div class="${itemClasses}">
           <div class="${textStackClasses}">
             <strong>Ambulancia ${ambulance.id}</strong>
-            <span class="${mutedTextClasses}">${ambulance.driver}</span>
+            <span class="${mutedTextClasses}">${ambulance.driver ?? ambulance.name}</span>
           </div>
           <div class="${metaClasses}">
-            <span class="${mutedTextClasses}">${ambulance.location}</span>
+            <span class="${mutedTextClasses}">${ambulance.location ?? ambulance.zone}</span>
             <span class="${pillClasses}">${priorityLabel(ambulance.priority)}</span>
           </div>
         </div>
