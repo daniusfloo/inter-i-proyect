@@ -446,7 +446,7 @@ function applyPreferences() {
   const emergencyLink = document.querySelector('a[href="tel:911"]');
   if (emergencyLink) {
     const svg = emergencyLink.querySelector("svg")?.outerHTML ?? "";
-    emergencyLink.innerHTML = `${svg}${t("emergency")}`;
+    emergencyLink.innerHTML = `${svg}<span class="hidden sm:inline">${t("emergency")}</span><span class="sm:hidden">911</span>`;
   }
 
   const heroTitle = document.querySelector("#menuHero h1");

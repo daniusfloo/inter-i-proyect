@@ -240,6 +240,14 @@
         transform: scaleX(1);
       }
 
+      #topNavMenu {
+        scrollbar-width: none;
+      }
+
+      #topNavMenu::-webkit-scrollbar {
+        display: none;
+      }
+
       @keyframes seaPanelIn {
         from {
           opacity: 0;
@@ -364,6 +372,156 @@
         min-height: 520px;
         height: clamp(440px, 52vw, 620px);
         width: 100%;
+      }
+
+      @media (max-width: 767px) {
+        body {
+          background:
+            radial-gradient(circle at 18% 0%, rgba(37, 99, 235, 0.2), transparent 18rem),
+            radial-gradient(circle at 100% 10%, rgba(226, 29, 45, 0.18), transparent 16rem),
+            linear-gradient(180deg, #eef3f8 0%, #dce4ee 100%) !important;
+        }
+
+        #topNav {
+          background: rgba(244, 248, 252, 0.9) !important;
+          box-shadow: 0 18px 48px rgba(7, 24, 54, 0.18) !important;
+        }
+
+        #topNav > div {
+          min-height: 0;
+          padding-bottom: 0.55rem;
+          padding-top: 0.65rem;
+        }
+
+        .sea-logo-mark {
+          height: 44px;
+          width: 44px;
+        }
+
+        .sea-logo-mark::before,
+        .sea-logo-mark::after {
+          inset: 6px 15px;
+        }
+
+        .sea-logo-mark span {
+          height: 36px;
+          width: 14px;
+          font-size: 20px;
+        }
+
+        #homeLogoBtn {
+          max-width: calc(100vw - 148px);
+        }
+
+        #homeLogoBtn span:last-child {
+          min-width: 0;
+        }
+
+        #homeLogoBtn span:last-child span:first-child {
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        #topActions a,
+        #topLogoutBtn {
+          min-height: 44px;
+        }
+
+        #topLogoutBtn {
+          width: 44px;
+        }
+
+        #topNavMenu {
+          border-top: 1px solid rgba(148, 163, 184, 0.22);
+          margin-top: 0.55rem;
+          padding: 0.55rem 0 0.35rem;
+          scroll-padding-inline: 1rem;
+        }
+
+        .menu-tab {
+          background: rgba(255, 255, 255, 0.72);
+          border: 1px solid rgba(148, 163, 184, 0.2) !important;
+          border-radius: 8px;
+          box-shadow: 0 10px 26px rgba(7, 24, 54, 0.08);
+          min-height: 38px;
+          padding: 0.55rem 0.85rem !important;
+        }
+
+        .menu-tab::after {
+          display: none;
+        }
+
+        .menu-tab.text-blue-700 {
+          background: linear-gradient(135deg, #0b2a5b, #2563eb);
+          border-color: rgba(37, 99, 235, 0.4) !important;
+          color: #ffffff !important;
+          box-shadow: 0 14px 30px rgba(37, 99, 235, 0.24);
+        }
+
+        #systemContent {
+          min-height: calc(100vh - 126px);
+        }
+
+        #contentPanel {
+          padding-bottom: 1rem;
+          padding-top: 1rem;
+          width: min(100%, calc(100% - 24px)) !important;
+        }
+
+        #contentPanel > .grid,
+        #contentPanel > section {
+          gap: 1rem;
+        }
+
+        #contentPanel .rounded-lg {
+          border-radius: 8px;
+        }
+
+        #contentPanel .p-7,
+        #contentPanel .p-6 {
+          padding: 1.25rem !important;
+        }
+
+        #contentPanel .p-5 {
+          padding: 1rem !important;
+        }
+
+        #contentPanel h1 {
+          font-size: clamp(2rem, 10vw, 2.6rem) !important;
+          line-height: 1.05 !important;
+        }
+
+        #contentPanel h2 {
+          font-size: clamp(1.35rem, 6vw, 1.85rem) !important;
+          line-height: 1.12 !important;
+        }
+
+        #contentPanel input,
+        #contentPanel select,
+        #contentPanel textarea {
+          border-radius: 8px !important;
+          min-height: 46px;
+        }
+
+        #contentPanel button {
+          border-radius: 8px !important;
+        }
+
+        #homeTrackingMap,
+        #peopleMap {
+          height: min(72vh, 430px);
+          min-height: 340px;
+        }
+
+        .help-widget {
+          bottom: 1rem;
+          right: 1rem;
+        }
+
+        .help-widget-panel {
+          max-height: calc(100vh - 110px);
+        }
       }
 
       .sea-static-map {
@@ -498,25 +656,25 @@
       </section>
 
       <header id="topNav" class="sticky top-0 z-40 hidden border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur-xl">
-        <div class="mx-auto flex min-h-20 w-[min(100%,calc(100%-48px))] items-center justify-between gap-6">
-          <button id="homeLogoBtn" class="flex items-center gap-4 text-left" type="button" aria-label="Inicio">
+        <div class="mx-auto flex min-h-20 w-[min(100%,calc(100%-32px))] flex-wrap items-center justify-between gap-x-4 gap-y-1 lg:w-[min(100%,calc(100%-48px))] lg:flex-nowrap lg:gap-6">
+          <button id="homeLogoBtn" class="flex items-center gap-2 text-left sm:gap-4" type="button" aria-label="Inicio">
             <span class="sea-logo-mark"><span>+</span></span>
             <span>
-              <span class="block text-4xl font-black leading-none tracking-normal text-[#071836]">Ruta vida CR</span>
+              <span class="block text-2xl font-black leading-none tracking-normal text-[#071836] sm:text-4xl">Ruta vida CR</span>
               <span class="block text-xs font-bold uppercase leading-tight text-[#071836]">Sistema de rutas<br />y emergencias</span>
             </span>
           </button>
-          <nav id="topNavMenu" class="hidden items-center gap-7 text-sm font-bold text-[#071836] lg:flex">
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="inicio" type="button">Inicio</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="tracking" type="button">Ambulancias</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="personas" type="button">Personas</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="control" type="button">Control</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="monitor" type="button">Monitor</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="directorio" type="button">Directorio</button>
-            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="configuraciones" type="button">Ajustes</button>
+          <nav id="topNavMenu" class="order-3 flex w-full items-center gap-5 overflow-x-auto text-sm font-bold text-[#071836] lg:order-none lg:w-auto lg:gap-7 lg:overflow-visible">
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="inicio" type="button">Inicio</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="tracking" type="button">Ambulancias</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="personas" type="button">Personas</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="control" type="button">Control</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="monitor" type="button">Monitor</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="directorio" type="button">Directorio</button>
+            <button class="menu-tab shrink-0 whitespace-nowrap border-b-2 border-transparent py-4 transition hover:text-blue-700 lg:py-7" data-section="configuraciones" type="button">Ajustes</button>
           </nav>
-          <div id="topActions" class="flex items-center gap-3">
-            <button id="mobileMenuBtn" class="inline-grid min-h-12 w-12 place-items-center rounded-md border border-slate-200 bg-white text-[#071836] shadow-sm transition hover:bg-slate-50 active:scale-[.98] lg:hidden" type="button" aria-label="Abrir menu" aria-controls="topNavMenu" aria-expanded="false">
+          <div id="topActions" class="flex items-center gap-2 sm:gap-3">
+            <button id="mobileMenuBtn" class="hidden min-h-12 w-12 place-items-center rounded-md border border-slate-200 bg-white text-[#071836] shadow-sm transition hover:bg-slate-50 active:scale-[.98]" type="button" aria-label="Abrir menu" aria-controls="topNavMenu" aria-expanded="false">
               <svg id="mobileMenuOpenIcon" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M4 6h16"></path>
                 <path d="M4 12h16"></path>
@@ -527,11 +685,12 @@
                 <path d="m6 6 12 12"></path>
               </svg>
             </button>
-            <a class="inline-flex min-h-12 items-center gap-3 rounded-md bg-red-600 px-5 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" href="tel:911">
+            <a class="inline-flex min-h-12 items-center gap-2 rounded-md bg-red-600 px-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98] sm:gap-3 sm:px-5" href="tel:911">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8 9.91a16 16 0 0 0 6.09 6.09l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"></path>
               </svg>
-              EMERGENCIA 911
+              <span class="hidden sm:inline">EMERGENCIA 911</span>
+              <span class="sm:hidden">911</span>
             </a>
             <button id="topLogoutBtn" class="inline-grid min-h-12 w-12 place-items-center rounded-md border border-slate-200 bg-white text-[#071836] shadow-sm transition hover:bg-slate-50 active:scale-[.98]" type="button" aria-label="Volver">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
