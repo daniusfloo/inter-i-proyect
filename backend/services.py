@@ -14,13 +14,13 @@ traffic_lights = [
 ambulances = [
     Ambulance(
         id=1,
-        name="Unidad S.E.A-01",
+        name="Unidad Ruta vida CR-01",
         model="Toyota Hiace",
         zone="Base Norte",
         province="San Jose",
         staff_count=3,
         preferred_hospital="Hospital Mexico",
-        company="S.E.A",
+        company="Ruta vida CR",
         driver="Ana Perez",
         location="Base Norte",
         priority="medium",
@@ -28,13 +28,13 @@ ambulances = [
     ),
     Ambulance(
         id=2,
-        name="Unidad S.E.A-02",
+        name="Unidad Ruta vida CR-02",
         model="Mercedes-Benz Sprinter",
         zone="Base Sur",
         province="San Jose",
         staff_count=2,
         preferred_hospital="Hospital San Juan de Dios",
-        company="S.E.A",
+        company="Ruta vida CR",
         driver="Luis Rojas",
         location="Base Sur",
         priority="low",
@@ -127,7 +127,7 @@ def ask_open_source_health_ai(message: str, agent: str = "salud"):
             {
                 "role": "system",
                 "content": (
-                    "Eres un asistente de inteligencia artificial de codigo abierto integrado en S.E.A. "
+                    "Eres un asistente de inteligencia artificial de codigo abierto integrado en Ruta vida CR. "
                     "Responde en espanol de forma clara, util y natural."
                 ),
             },
@@ -215,6 +215,6 @@ def get_basic_health_ai_answer(message: str, agent: str = "salud"):
         )
 
     if any(word in text for word in ["que eres", "quien eres", "como funcionas", "ia"]):
-        return "Soy el asistente de S.E.A. Si Ollama esta activo uso un modelo abierto; si no, uso respuestas basicas locales."
+        return "Soy el asistente de Ruta vida CR. Si Ollama esta activo uso un modelo abierto; si no, uso respuestas basicas locales."
 
     return "Puedo ayudarte con eso. Dame un poco mas de contexto o una pregunta mas especifica para responderte mejor."

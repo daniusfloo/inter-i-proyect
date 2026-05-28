@@ -44,8 +44,8 @@ export function getMenuSections() {
       type: "settings",
     },
     tracking: {
-      title: "Ambulancias S.E.A.",
-      intro: "Flota operativa del Servicio de Emergencia en Ambulancia.",
+      title: "Ambulancias Ruta vida CR",
+      intro: "Flota operativa de Ruta vida CR.",
       type: "tracking",
     },
     personas: {

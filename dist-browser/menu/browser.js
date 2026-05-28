@@ -44,8 +44,8 @@ function getMenuSections() {
       type: "settings",
     },
     tracking: {
-      title: "Ambulancias S.E.A.",
-      intro: "Flota operativa del Servicio de Emergencia en Ambulancia.",
+      title: "Ambulancias Ruta vida CR",
+      intro: "Flota operativa de Ruta vida CR.",
       type: "tracking",
     },
     personas: {
@@ -107,7 +107,7 @@ const translations = {
     navDirectory: "Directorio",
     navSettings: "Ajustes",
     emergency: "EMERGENCIA 911",
-    heroTitle: "S.E.A: Servicio de Emergencia en Ambulancia",
+    heroTitle: "Ruta vida CR",
     heroSubtitle: "Sistema para coordinar ambulancias, personal y mensajes de emergencia.",
     coverageTitle: "Cobertura",
     coverageText: "San Jose y Alajuela",
@@ -155,7 +155,7 @@ const translations = {
     navDirectory: "Directory",
     navSettings: "Settings",
     emergency: "EMERGENCY 911",
-    heroTitle: "S.E.A: Ambulance Emergency Service",
+    heroTitle: "Ruta vida CR",
     heroSubtitle: "System for coordinating ambulances, staff, and emergency messages.",
     coverageTitle: "Coverage",
     coverageText: "San Jose and Alajuela",
@@ -226,7 +226,7 @@ const knownCostaRicaPlaces = [
 ];
 const helpAgents = {
   salud: {
-    name: "IA S.E.A",
+    name: "IA Ruta vida CR",
     role: "Asistente abierto",
     avatar: "OS",
     status: "online",
@@ -310,7 +310,7 @@ let peopleEntries = [
     condition: "Sin enfermedad registrada",
     emergencyContact: "Mario Perez - 8999-0101",
     shift: "Diurno",
-    company: "S.E.A",
+    company: "Ruta vida CR",
     latitude: 9.9629,
     longitude: -84.0879,
   },
@@ -323,7 +323,7 @@ let peopleEntries = [
     condition: "Hipertension controlada",
     emergencyContact: "Carolina Rojas - 8999-0202",
     shift: "Nocturno",
-    company: "S.E.A",
+    company: "Ruta vida CR",
     latitude: 9.8728,
     longitude: -84.0719,
   },
@@ -336,7 +336,7 @@ let peopleEntries = [
     condition: "Sin enfermedad registrada",
     emergencyContact: "Andres Solis - 8999-0303",
     shift: "Mixto",
-    company: "S.E.A",
+    company: "Ruta vida CR",
     latitude: 9.9325,
     longitude: -84.08,
   },
@@ -528,8 +528,8 @@ function renderSection(sectionId) {
         <section class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_52%,#e21d2d_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
           <div class="grid gap-7 lg:grid-cols-[1fr_340px] lg:items-end">
             <div>
-              <p class="text-sm font-black uppercase text-red-100">Servicio de Emergencia en Ambulancia</p>
-              <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Ambulancias S.E.A.</h1>
+              <p class="text-sm font-black uppercase text-red-100">Ruta vida CR</p>
+              <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Ambulancias Ruta vida CR</h1>
               <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
                 Panel de flota para revisar unidades, conductores y disponibilidad operativa de la empresa.
               </p>
@@ -563,13 +563,13 @@ function renderSection(sectionId) {
           </div>
 
           <form id="ambulanceForm" class="mt-6 hidden grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-            ${renderAmbulanceInput("ambulanceNameInput", "Nombre", "Unidad S.E.A-03")}
+            ${renderAmbulanceInput("ambulanceNameInput", "Nombre", "Unidad Ruta vida CR-03")}
             ${renderAmbulanceInput("ambulanceModelInput", "Modelo", "Toyota Hiace")}
             ${renderAmbulanceInput("ambulanceZoneInput", "Zona", "Base Este")}
             ${renderAmbulanceInput("ambulanceProvinceInput", "Provincia", "San Jose")}
             ${renderAmbulanceInput("ambulanceStaffInput", "Cantidad de personal", "3", "number")}
             ${renderAmbulanceInput("ambulanceHospitalInput", "Hospital de preferencia", "Hospital Mexico")}
-            ${renderAmbulanceInput("ambulanceCompanyInput", "Compania", "S.E.A")}
+            ${renderAmbulanceInput("ambulanceCompanyInput", "Compania", "Ruta vida CR")}
             <button class="self-end rounded-md bg-red-600 px-5 py-3 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
               Guardar ambulancia
             </button>
@@ -1095,7 +1095,7 @@ function handlePeopleFormSubmit(event) {
       condition: "Sin enfermedad registrada",
       emergencyContact: "No registrado",
       shift: "Sin turno asignado",
-      company: "S.E.A",
+      company: "Ruta vida CR",
       latitude: 9.9325,
       longitude: -84.08,
     },
@@ -1377,13 +1377,13 @@ function renderCriticalDetail(label, value) {
 const fallbackAmbulances = [
   {
     id: 1,
-    name: "Unidad S.E.A-01",
+    name: "Unidad Ruta vida CR-01",
     model: "Toyota Hiace",
     zone: "Base Norte",
     province: "San Jose",
     staff_count: 3,
     preferred_hospital: "Hospital Mexico",
-    company: "S.E.A",
+    company: "Ruta vida CR",
     driver: "Ana Perez",
     location: "Base Norte",
     priority: "medium",
@@ -1391,13 +1391,13 @@ const fallbackAmbulances = [
   },
   {
     id: 2,
-    name: "Unidad S.E.A-02",
+    name: "Unidad Ruta vida CR-02",
     model: "Mercedes-Benz Sprinter",
     zone: "Base Sur",
     province: "San Jose",
     staff_count: 2,
     preferred_hospital: "Hospital San Juan de Dios",
-    company: "S.E.A",
+    company: "Ruta vida CR",
     driver: "Luis Rojas",
     location: "Base Sur",
     priority: "low",
@@ -1766,7 +1766,7 @@ function getBasicHealthAiAnswer(message, agent = "salud") {
   }
 
   if (/(ruta|ambulancia|traslado|mapa|llegar|trafico|origen|destino)/.test(text)) {
-    return "Para revisar ambulancias de S.E.A, abre la pagina Ambulancias. Ahi puedes ver unidades, conductores, ubicacion, prioridad y disponibilidad operativa.";
+    return "Para revisar ambulancias de Ruta vida CR, abre la pagina Ambulancias. Ahi puedes ver unidades, conductores, ubicacion, prioridad y disponibilidad operativa.";
   }
 
   if (/(protocolo|ministerio|salud publica|triaje|prioridad|paciente)/.test(text)) {
@@ -1782,7 +1782,7 @@ function getBasicHealthAiAnswer(message, agent = "salud") {
   }
 
   if (/(que eres|quien eres|como funcionas|ia|inteligencia artificial)/.test(text)) {
-    return "Soy el asistente de S.E.A. Si Ollama esta activo uso un modelo abierto; si no, uso respuestas basicas locales.";
+    return "Soy el asistente de Ruta vida CR. Si Ollama esta activo uso un modelo abierto; si no, uso respuestas basicas locales.";
   }
 
   if (agent === "directorio") {
