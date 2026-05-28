@@ -31,6 +31,7 @@
         box-shadow: 0 30px 90px rgba(7, 24, 54, 0.5);
       }
     </style>
+    <link rel="stylesheet" href="../frontend-responsive.css" />
   </head>
   <body class="bg-slate-100 text-slate-900 antialiased">
     <main class="mx-auto min-h-screen w-[min(1040px,calc(100%-32px))] py-8">
@@ -73,15 +74,15 @@
           </div>
 
           <div
-            class="mt-5 flex min-h-[360px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white"
+            class="route-visual-panel mt-5 flex min-h-[360px] items-center justify-center rounded-lg border border-dashed border-slate-300 bg-white p-4"
           >
-            <div class="w-[min(520px,85%)]">
-              <div class="grid grid-cols-[120px_1fr_120px] items-center gap-3">
+            <div class="w-[min(520px,100%)]">
+              <div class="route-visual-flow grid grid-cols-[120px_1fr_120px] items-center gap-3">
                 <div class="rounded-lg border border-slate-200 bg-slate-50 p-4 text-center">
                   <p class="text-sm font-bold text-slate-500">Origen</p>
                   <p class="mt-1 font-bold text-slate-900">Emergencia</p>
                 </div>
-                <div class="h-1 rounded-full bg-teal-600"></div>
+                <div class="route-visual-line h-1 rounded-full bg-teal-600"></div>
                 <div class="rounded-lg border border-teal-100 bg-teal-50 p-4 text-center">
                   <p class="text-sm font-bold text-teal-700">Destino</p>
                   <p id="nearestHospital" class="mt-1 font-bold text-slate-900">Hospital</p>

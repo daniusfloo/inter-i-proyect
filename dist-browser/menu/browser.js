@@ -53,6 +53,16 @@ function getMenuSections() {
       intro: "Personal operativo registrado para apoyar ambulancias y emergencias.",
       type: "people",
     },
+    control: {
+      title: "Control",
+      intro: "Panel interno para enviar señales operativas al monitor.",
+      type: "panelControl",
+    },
+    monitor: {
+      title: "Monitor",
+      intro: "Panel interno para recibir señales enviadas desde control.",
+      type: "panelMonitor",
+    },
     directorio: {
       title: "Directorio",
       intro: "Telefonos de hospitales, clinicas y contactos medicos de Costa Rica.",
@@ -76,6 +86,9 @@ const toggleModalPassword = document.querySelector("#toggleModalPassword");
 const signinFromModal = document.querySelector("#signinFromModal");
 const topLogoutBtn = document.querySelector("#topLogoutBtn");
 const topNav = document.querySelector("#topNav");
+const mobileMenuBtn = document.querySelector("#mobileMenuBtn");
+const mobileMenuOpenIcon = document.querySelector("#mobileMenuOpenIcon");
+const mobileMenuCloseIcon = document.querySelector("#mobileMenuCloseIcon");
 const homeLogoBtn = document.querySelector("#homeLogoBtn");
 const ambulanceIconBtn = document.querySelector("#ambulanceIconBtn");
 const settingsIconBtn = document.querySelector("#settingsIconBtn");
@@ -104,6 +117,8 @@ const translations = {
     navHome: "Inicio",
     navTracking: "Ambulancias",
     navPeople: "Personas",
+    navControl: "Control",
+    navMonitor: "Monitor",
     navDirectory: "Directorio",
     navSettings: "Ajustes",
     emergency: "EMERGENCIA 911",
@@ -152,6 +167,8 @@ const translations = {
     navHome: "Home",
     navTracking: "Ambulances",
     navPeople: "People",
+    navControl: "Control",
+    navMonitor: "Monitor",
     navDirectory: "Directory",
     navSettings: "Settings",
     emergency: "EMERGENCY 911",
@@ -203,6 +220,7 @@ let isHelpOpen = false;
 let homeTrackingMap = null;
 let homeTrackingRouteLayer = null;
 let homeTrackingMarkerLayer = null;
+const PANEL_SIGNALS_KEY = "seaPanelSignals";
 const costaRicaBounds = [
   [8.03, -85.95],
   [11.22, -82.45],
@@ -381,9 +399,21 @@ const inactiveTabClasses = [
 function setupTabs() {
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => {
+      setMobileMenuOpen(false);
       renderSection(tab.dataset.section);
     });
   });
+}
+
+function setMobileMenuOpen(isOpen) {
+  if (!topNav || !mobileMenuBtn) {
+    return;
+  }
+
+  topNav.classList.toggle("is-mobile-menu-open", isOpen);
+  mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
+  mobileMenuOpenIcon?.classList.toggle("hidden", isOpen);
+  mobileMenuCloseIcon?.classList.toggle("hidden", !isOpen);
 }
 
 function t(key) {
@@ -404,6 +434,8 @@ function applyPreferences() {
     ["inicio", t("navHome")],
     ["tracking", t("navTracking")],
     ["personas", t("navPeople")],
+    ["control", t("navControl")],
+    ["monitor", t("navMonitor")],
     ["directorio", t("navDirectory")],
     ["configuraciones", t("navSettings")],
   ];
@@ -607,7 +639,7 @@ function renderSection(sectionId) {
         </div>
 
         <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
-          <div class="grid min-h-12 grid-cols-3 rounded-md bg-slate-100 p-1 text-sm font-black text-slate-600 md:w-[620px]">
+          <div class="grid min-h-12 gap-1 rounded-md bg-slate-100 p-1 text-sm font-black text-slate-600 sm:grid-cols-3 md:w-[620px]">
             <button class="people-directory-tab rounded px-4 transition" data-people-tab="staff" type="button">Personal</button>
             <button class="people-directory-tab rounded px-4 transition" data-people-tab="critical" type="button">Salud critica</button>
             <button class="people-directory-tab rounded px-4 transition" data-people-tab="map" type="button">Mapa</button>
@@ -656,6 +688,97 @@ function renderSection(sectionId) {
       </section>
     `;
     setupDirectory();
+    return;
+  }
+
+  if (section.type === "panelControl") {
+    contentPanel.innerHTML = `
+      <section class="grid gap-6">
+        <div class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_56%,#2563eb_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
+          <p class="text-sm font-black uppercase text-blue-100">Centro operativo</p>
+          <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Control</h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
+            Envia señales operativas al monitor interno del panel principal.
+          </p>
+        </div>
+
+        <section class="grid gap-5 lg:grid-cols-[1fr_360px]">
+          <form id="panelControlForm" class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+            <p class="text-sm font-black uppercase text-red-600">Nueva señal</p>
+            <h2 class="mt-1 text-2xl font-black text-[#071836]">Enviar señal al monitor</h2>
+            <p class="mt-2 text-sm leading-6 text-slate-500">La señal se guarda en el panel y puede revisarse desde Monitor.</p>
+
+            <div class="mt-6 grid gap-4 md:grid-cols-2">
+              <label class="grid gap-2 text-sm font-bold text-[#071836]">
+                Tipo de señal
+                <select id="panelSignalType" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100">
+                  <option value="Alta prioridad">Alta prioridad</option>
+                  <option value="Ruta actualizada">Ruta actualizada</option>
+                  <option value="Ambulancia disponible">Ambulancia disponible</option>
+                  <option value="Emergencia recibida">Emergencia recibida</option>
+                </select>
+              </label>
+              <label class="grid gap-2 text-sm font-bold text-[#071836]">
+                Destino
+                <input id="panelSignalTarget" class="min-h-11 rounded-md border border-slate-200 bg-white px-4 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" value="Monitor" required />
+              </label>
+            </div>
+
+            <label class="mt-4 grid gap-2 text-sm font-bold text-[#071836]">
+              Mensaje
+              <textarea id="panelSignalMessage" class="min-h-32 rounded-md border border-slate-200 bg-white px-4 py-3 text-sm shadow-sm outline-none transition focus:border-blue-600 focus:ring-2 focus:ring-blue-100" placeholder="Ej: Ambulancia 1 enviada a emergencia." required></textarea>
+            </label>
+
+            <button class="mt-6 inline-flex min-h-11 items-center justify-center rounded-md bg-red-600 px-5 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" type="submit">
+              Enviar señal
+            </button>
+          </form>
+
+          <aside class="grid content-start gap-4">
+            <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70">
+              <p class="text-sm font-black uppercase text-blue-700">Conexion</p>
+              <h3 class="mt-1 text-2xl font-black text-[#071836]">Control -> Monitor</h3>
+              <p class="mt-2 text-sm leading-6 text-slate-500">Cada señal enviada desde Control aparece automaticamente en Monitor.</p>
+            </article>
+            <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-xl shadow-slate-200/70">
+              <p class="text-sm font-black uppercase text-red-600">Ultima señal</p>
+              <div id="panelLastSignal" class="mt-3"></div>
+            </article>
+          </aside>
+        </section>
+      </section>
+    `;
+    setupPanelControl();
+    return;
+  }
+
+  if (section.type === "panelMonitor") {
+    contentPanel.innerHTML = `
+      <section class="grid gap-6">
+        <div class="overflow-hidden rounded-lg border border-white/10 bg-[linear-gradient(135deg,#071836_0%,#0b2a5b_56%,#22d3ee_100%)] p-7 text-white shadow-2xl shadow-blue-950/20">
+          <p class="text-sm font-black uppercase text-blue-100">Recepcion de señales</p>
+          <h1 class="mt-2 text-4xl font-black leading-tight md:text-5xl">Monitor</h1>
+          <p class="mt-4 max-w-2xl text-base leading-7 text-blue-50">
+            Consulta las señales operativas enviadas desde Control.
+          </p>
+        </div>
+
+        <section class="rounded-lg border border-slate-200 bg-white p-6 shadow-xl shadow-slate-200/70">
+          <div class="flex flex-col justify-between gap-4 md:flex-row md:items-center">
+            <div>
+              <p class="text-sm font-black uppercase text-blue-700">Bandeja</p>
+              <h2 class="mt-1 text-3xl font-black text-[#071836]">Señales recibidas</h2>
+              <p class="mt-2 text-sm text-slate-500">Las señales se actualizan desde el panel principal.</p>
+            </div>
+            <button id="clearPanelSignalsBtn" class="inline-flex min-h-11 items-center justify-center rounded-md border border-slate-200 bg-white px-5 text-sm font-black text-[#071836] shadow-sm transition hover:bg-slate-50 active:scale-[.98]" type="button" onclick="window.clearSeaPanelSignals?.(event)">
+              Limpiar señales
+            </button>
+          </div>
+          <div id="panelSignalList" class="mt-6 grid gap-4"></div>
+        </section>
+      </section>
+    `;
+    renderPanelMonitor();
     return;
   }
 
@@ -737,6 +860,124 @@ function renderSection(sectionId) {
   }
 
   renderSection("inicio");
+}
+
+function getPanelSignals() {
+  try {
+    return JSON.parse(localStorage.getItem(PANEL_SIGNALS_KEY) || "[]");
+  } catch (error) {
+    return [];
+  }
+}
+
+function savePanelSignals(signals) {
+  localStorage.setItem(PANEL_SIGNALS_KEY, JSON.stringify(signals));
+}
+
+function clearPanelSignals() {
+  savePanelSignals([]);
+}
+
+function refreshPanelSignalViews(signal = getPanelSignals()[0]) {
+  renderPanelLastSignal(signal);
+  renderPanelMonitor();
+}
+
+function handleClearPanelSignals(event) {
+  event?.preventDefault?.();
+  event?.stopPropagation?.();
+  clearPanelSignals();
+  refreshPanelSignalViews(null);
+}
+
+function createPanelSignal(type, target, message) {
+  const signals = getPanelSignals();
+  const nextSignal = {
+    id: Date.now(),
+    type,
+    target,
+    message,
+    createdAt: new Date().toLocaleString("es-CR"),
+  };
+
+  savePanelSignals([nextSignal, ...signals].slice(0, 20));
+  return nextSignal;
+}
+
+function setupPanelControl() {
+  const form = document.querySelector("#panelControlForm");
+
+  renderPanelLastSignal();
+
+  form.addEventListener("submit", (event) => {
+    event.preventDefault();
+    const type = document.querySelector("#panelSignalType").value;
+    const target = document.querySelector("#panelSignalTarget").value.trim() || "Monitor";
+    const message = document.querySelector("#panelSignalMessage").value.trim();
+
+    if (!message) {
+      return;
+    }
+
+    const signal = createPanelSignal(type, target, message);
+    event.currentTarget.reset();
+    document.querySelector("#panelSignalTarget").value = "Monitor";
+    refreshPanelSignalViews(signal);
+  });
+}
+
+function renderPanelLastSignal(signal = getPanelSignals()[0]) {
+  const lastSignal = document.querySelector("#panelLastSignal");
+
+  if (!lastSignal) {
+    return;
+  }
+
+  if (!signal) {
+    lastSignal.innerHTML = `
+      <p class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-4 text-sm font-bold text-slate-500">
+        No se han enviado señales.
+      </p>
+    `;
+    return;
+  }
+
+  lastSignal.innerHTML = renderPanelSignalCard(signal);
+}
+
+function renderPanelMonitor() {
+  const list = document.querySelector("#panelSignalList");
+  const signals = getPanelSignals();
+
+  if (!list) {
+    return;
+  }
+
+  if (signals.length === 0) {
+    list.innerHTML = `
+      <article class="rounded-lg border border-dashed border-slate-200 bg-slate-50 p-6">
+        <p class="font-black text-[#071836]">Sin señales recibidas</p>
+        <p class="mt-2 text-sm text-slate-500">Cuando Control envie una señal, aparecera en esta bandeja.</p>
+      </article>
+    `;
+  } else {
+    list.innerHTML = signals.map(renderPanelSignalCard).join("");
+  }
+}
+
+function renderPanelSignalCard(signal) {
+  return `
+    <article class="rounded-lg border border-slate-200 bg-white p-5 shadow-lg shadow-slate-200/60">
+      <div class="flex flex-col justify-between gap-3 md:flex-row md:items-start">
+        <div>
+          <p class="text-xs font-black uppercase text-red-600">${escapeHtml(signal.type)}</p>
+          <h3 class="mt-1 text-xl font-black text-[#071836]">${escapeHtml(signal.target)}</h3>
+        </div>
+        <span class="rounded-full bg-blue-50 px-3 py-1 text-xs font-black uppercase text-blue-700">${escapeHtml(signal.createdAt)}</span>
+      </div>
+      <p class="mt-4 rounded-md bg-slate-50 px-4 py-3 text-sm font-bold leading-6 text-slate-700">${escapeHtml(signal.message)}</p>
+    </article>
+  `;
 }
 
 function setupHomeTrackingMap() {
@@ -1839,6 +2080,7 @@ function returnToLogin() {
   closeCreateAccountModal();
   localStorage.removeItem("seaSessionActive");
   localStorage.removeItem("seaSection");
+  setMobileMenuOpen(false);
   setHelpOpen(false);
   helpWidget.classList.add("hidden");
   helpWidget.classList.remove("flex");
@@ -1905,6 +2147,14 @@ document.addEventListener("click", (event) => {
   }
 
   window.setSeaTheme(themeButton.dataset.themeOption);
+});
+document.addEventListener("click", (event) => {
+  const clearSignalsButton = event.target.closest?.("#clearPanelSignalsBtn");
+  if (!clearSignalsButton) {
+    return;
+  }
+
+  handleClearPanelSignals(event);
 });
 document.addEventListener("pointerdown", (event) => {
   const themeButton = event.target.closest?.("[data-theme-option]");
@@ -1979,7 +2229,11 @@ document.addEventListener("submit", (event) => {
   handlePeopleFormSubmit(event);
 });
 homeLogoBtn.addEventListener("click", () => {
+  setMobileMenuOpen(false);
   renderSection("inicio");
+});
+if (mobileMenuBtn) mobileMenuBtn.addEventListener("click", () => {
+  setMobileMenuOpen(!topNav.classList.contains("is-mobile-menu-open"));
 });
 if (ambulanceIconBtn) ambulanceIconBtn.addEventListener("click", () => {
   renderSection("tracking");
@@ -2000,6 +2254,9 @@ toggleModalPassword.addEventListener("click", () => {
   toggleModalPassword.textContent = isHidden ? "Hide" : "Show";
 });
 document.addEventListener("keydown", (event) => {
+  if (event.key === "Escape") {
+    setMobileMenuOpen(false);
+  }
   if (event.key === "Escape" && !signupModal.classList.contains("hidden")) {
     closeCreateAccountModal();
   }
@@ -2008,3 +2265,9 @@ document.addEventListener("keydown", (event) => {
     closeStaffPersonModal();
   }
 });
+window.addEventListener("storage", (event) => {
+  if (event.key === PANEL_SIGNALS_KEY) {
+    refreshPanelSignalViews();
+  }
+});
+window.clearSeaPanelSignals = handleClearPanelSignals;

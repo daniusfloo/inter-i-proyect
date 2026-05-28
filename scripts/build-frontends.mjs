@@ -5,6 +5,8 @@ import { fileURLToPath } from "node:url";
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const dist = resolve(root, "dist");
 const browserDist = resolve(root, "dist-browser");
+const responsiveStyles = resolve(root, "frontend-responsive.css");
+const buildVersion = Date.now().toString(36);
 
 const builds = [
   {
@@ -48,6 +50,8 @@ await rm(dist, { recursive: true, force: true });
 await rm(browserDist, { recursive: true, force: true });
 await mkdir(dist, { recursive: true });
 await mkdir(browserDist, { recursive: true });
+await cp(responsiveStyles, resolve(dist, "frontend-responsive.css"));
+await cp(responsiveStyles, resolve(browserDist, "frontend-responsive.css"));
 
 for (const build of builds) {
   await cp(build.from, build.to, { recursive: true });
@@ -85,7 +89,7 @@ async function createBrowserBundle(sourceDir, targetDir) {
   const browserApp = app.replace(/import[\s\S]*?from "\.\/api\.js";\r?\n\r?\n/, "");
   const browserIndex = index.replace(
     '<script type="module" src="app.js"></script>',
-    '<script src="browser.js"></script>',
+    `<script src="browser.js?v=${buildVersion}"></script>`,
   );
 
   await writeFile(bundlePath, `${browserApi}\n\n${browserApp}`);

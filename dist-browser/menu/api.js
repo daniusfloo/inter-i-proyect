@@ -53,6 +53,16 @@ export function getMenuSections() {
       intro: "Personal operativo registrado para apoyar ambulancias y emergencias.",
       type: "people",
     },
+    control: {
+      title: "Control",
+      intro: "Panel interno para enviar señales operativas al monitor.",
+      type: "panelControl",
+    },
+    monitor: {
+      title: "Monitor",
+      intro: "Panel interno para recibir señales enviadas desde control.",
+      type: "panelMonitor",
+    },
     directorio: {
       title: "Directorio",
       intro: "Telefonos de hospitales, clinicas y contactos medicos de Costa Rica.",

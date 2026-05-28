@@ -396,6 +396,14 @@
           transform 220ms cubic-bezier(0.2, 0.8, 0.2, 1);
       }
 
+      .help-widget {
+        pointer-events: none;
+      }
+
+      #helpToggleBtn {
+        pointer-events: auto;
+      }
+
       .help-widget.is-open .help-widget-panel {
         transform: translateY(0) scale(1);
         opacity: 1;
@@ -428,6 +436,7 @@
         }
       }
     </style>
+    <link rel="stylesheet" href="../frontend-responsive.css" />
   </head>
   <body class="text-slate-950 antialiased">
     <main class="sea-shell min-h-screen">
@@ -497,14 +506,27 @@
               <span class="block text-xs font-bold uppercase leading-tight text-[#071836]">Servicio de emergencia<br />en ambulancia</span>
             </span>
           </button>
-          <nav class="hidden items-center gap-10 text-sm font-bold text-[#071836] lg:flex">
+          <nav id="topNavMenu" class="hidden items-center gap-7 text-sm font-bold text-[#071836] lg:flex">
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="inicio" type="button">Inicio</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="tracking" type="button">Ambulancias</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="personas" type="button">Personas</button>
+            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="control" type="button">Control</button>
+            <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="monitor" type="button">Monitor</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="directorio" type="button">Directorio</button>
             <button class="menu-tab border-b-2 border-transparent py-7 transition hover:text-blue-700" data-section="configuraciones" type="button">Ajustes</button>
           </nav>
-          <div class="flex items-center gap-3">
+          <div id="topActions" class="flex items-center gap-3">
+            <button id="mobileMenuBtn" class="inline-grid min-h-12 w-12 place-items-center rounded-md border border-slate-200 bg-white text-[#071836] shadow-sm transition hover:bg-slate-50 active:scale-[.98] lg:hidden" type="button" aria-label="Abrir menu" aria-controls="topNavMenu" aria-expanded="false">
+              <svg id="mobileMenuOpenIcon" class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 6h16"></path>
+                <path d="M4 12h16"></path>
+                <path d="M4 18h16"></path>
+              </svg>
+              <svg id="mobileMenuCloseIcon" class="hidden h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M18 6 6 18"></path>
+                <path d="m6 6 12 12"></path>
+              </svg>
+            </button>
             <a class="inline-flex min-h-12 items-center gap-3 rounded-md bg-red-600 px-5 text-sm font-black text-white shadow-lg shadow-red-600/20 transition hover:bg-red-700 active:scale-[.98]" href="tel:911">
               <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
                 <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.08 4.18 2 2 0 0 1 4.06 2h3a2 2 0 0 1 2 1.72c.13.96.35 1.9.66 2.81a2 2 0 0 1-.45 2.11L8 9.91a16 16 0 0 0 6.09 6.09l1.27-1.27a2 2 0 0 1 2.11-.45c.91.31 1.85.53 2.81.66A2 2 0 0 1 22 16.92z"></path>
@@ -667,6 +689,6 @@
       </article>
     </section>
 
-    <script src="browser.js"></script>
+    <script src="browser.js?v=mpov3pq4"></script>
   </body>
 </html>
